@@ -1,4 +1,6 @@
-﻿namespace FormulaEvaluator
+﻿using System.Text.RegularExpressions;
+
+namespace FormulaEvaluator
 {
     /// <summary> 
     /// Author:    Tate Reynolds 
@@ -12,10 +14,31 @@
     /// 
     /// File Contents 
     /// 
-    ///    [... and of course you should describe the contents of the file in broad terms here ...] 
+    /// This namespace and class is a formula evaluator using RegEx and delegates. 
     /// </summary>
     public class Evaluator
     {
+        /// <summary>
+        /// stacks used for the infix operations
+        /// </summary>
+        private Stack<string> Operator = new Stack<string>();
+        private Stack<int> Value = new Stack<int>();
 
+
+        public delegate int Lookup(String variable_name);
+
+        /// <summary>
+        /// This function takes in a string arithmetic expression and evaluates it.
+        /// </summary>
+        /// <param name="expression"> a string expression including (,),+,-,*,/,int,or string variables
+        /// i.e. (5*2)/6+X
+        /// </param>
+        /// <param name="variableEvaluator"> a delegate used for looking up input string variables</param>
+        /// <returns></returns>
+        public static int Evaluate(String expression, Lookup variableEvaluator)
+        {
+            string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+            return 0;
+        }
     }
 }
