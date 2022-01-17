@@ -21,8 +21,8 @@ namespace FormulaEvaluator
         /// <summary>
         /// stacks used for the infix operations
         /// </summary>
-        private Stack<string> Operator = new Stack<string>();
-        private Stack<int> Value = new Stack<int>();
+        private static Stack<string> Operator = new Stack<string>();
+        private static Stack<int> Value = new Stack<int>();
 
 
         public delegate int Lookup(String variable_name);
@@ -38,7 +38,102 @@ namespace FormulaEvaluator
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
-            return 0;
+            //iterate through the substrings and perform operations accordingly
+            foreach (string s in substrings)
+            {
+
+                //if it's an integer
+                int val = 0;
+                if (int.TryParse(s, out val))
+                {
+                    if(Operator.Count == 0)
+                    {
+                        Value.Push(val);
+                    }
+                    // if multiplication or division is needed, pop the value stack 
+                    //and perform the operation on the current int and popped val int 
+                    else if(Operator.Peek() == "*")
+                    {
+                        int num1 = Value.Pop();
+                        int result = val * num1;
+                        Value.Push(result);
+                    } 
+                    else if (Operator.Peek() == "/")
+                    {
+                        int num1 = Value.Pop();
+                        int result = val / num1;
+                        Value.Push(result);
+                    }
+                    else
+                        Value.Push(val);
+                }
+                else if (false)
+                {
+                    //TODO: Check if it's a variable
+                }
+                else
+                {
+                    switch(s)
+                    {
+                        case "+":
+                            AddOrSubtract(s);
+                            break;
+                        case "-":
+                            AddOrSubtract(s);
+                            break;
+                        case "*":
+                            Operator.Push(s);
+                            break;
+                        case "/":
+                            Operator.Push(s);
+                            break;
+                        case "(":
+                            Operator.Push(s);
+                            break;
+                        case ")":
+                            //Operator.Push(s);
+                            break;
+                    }
+
+                }
+            }
+            if(Operator.Count == 0)
+                return Value.Pop();
+            else
+            {
+                int num1 = Value.Pop();
+                int num2 = Value.Pop();
+                int sum = 0;
+                string op = Operator.Pop();
+                if (op.Equals("+"))
+                    sum = num1 + num2;
+                else
+                    sum = num1 - num2;
+                return sum;
+            }
+
+        }
+
+        /// <summary>
+        /// Method to handle if the string is + or -
+        /// </summary>
+        /// <param name="s"> string s the operator</param>
+        private static void AddOrSubtract(String s)
+        {
+            if(Operator.Count == 0 || !Operator.Peek().Equals("+") || !Operator.Peek().Equals("-"))
+                Operator.Push(s);
+            else 
+            { 
+                int num1 = Value.Pop();
+                int num2 = Value.Pop();
+                int sum = 0;
+                string op = Operator.Pop();
+                if(op.Equals("+"))
+                    sum = num1 + num2;
+                else
+                    sum = num1 - num2; //TODO: make sure this is the right order!
+                Value.Push(sum);
+            }
         }
     }
 }
