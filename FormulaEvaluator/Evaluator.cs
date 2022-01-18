@@ -34,7 +34,7 @@ namespace FormulaEvaluator
         /// i.e. (5*2)/6+X
         /// </param>
         /// <param name="variableEvaluator"> a delegate used for looking up input string variables</param>
-        /// <returns></returns>
+        /// <returns> the result of the infix expression</returns>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
