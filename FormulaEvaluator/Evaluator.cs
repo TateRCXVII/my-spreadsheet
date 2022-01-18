@@ -63,7 +63,7 @@ namespace FormulaEvaluator
                     {
                         Operator.Pop();
                         int num1 = Value.Pop();
-                        int result = val / num1;
+                        int result = num1 / val;
                         Value.Push(result);
                     }
                     else
@@ -93,14 +93,15 @@ namespace FormulaEvaluator
                             Operator.Push(s);
                             break;
                         case ")":
-                            //Operator.Push(s);
+                            RightParenthesis(s);
                             break;
                     }
 
                 }
             }
-            if(Operator.Count == 0)
+            if (Operator.Count == 0)
                 return Value.Pop();
+            //perform + or - operation
             else
             {
                 int num1 = Value.Pop();
@@ -135,6 +136,47 @@ namespace FormulaEvaluator
                 else
                     sum = num1 - num2; //TODO: make sure this is the right order!
                 Value.Push(sum);
+            }
+        }
+
+        /// <summary>
+        /// Method to handle if the string is ")"
+        /// </summary>
+        /// <param name="s"> string s the operator</param>
+        private static void RightParenthesis(String s)
+        {
+            //if + or -, pop the value stack twice and perform the operation
+            //recursively using Evaluate
+            if(Operator.Peek().Equals("+") || Operator.Peek().Equals("-"))
+            {
+                String left = Value.Pop().ToString();
+                String right = Value.Pop().ToString();
+                String op = Operator.Pop();
+                String expression = left + op + right;
+                //TODO: Test with variables... 
+                Value.Push(Evaluate(expression, null));
+
+            }
+            //if statement needed to handle exception
+            //if the ( doesn't exist, the input is invalid
+            if (Operator.Peek().Equals("("))
+                Operator.Pop();
+            else
+                //throw exception
+                return;
+            //ensure there is somehting left in the op stack to check/evaluate
+            if (Operator.Count > 0)
+            {
+                if (Operator.Peek().Equals("*") || Operator.Peek().Equals("/"))
+                {
+                    String left = Value.Pop().ToString();
+                    String right = Value.Pop().ToString();
+                    String op = Operator.Pop();
+                    String expression = left + op + right;
+                    //TODO: Test with variables
+                    Value.Push(Evaluate(expression, null));
+
+                }
             }
         }
     }
