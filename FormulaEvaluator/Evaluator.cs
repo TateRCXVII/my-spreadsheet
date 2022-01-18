@@ -111,7 +111,7 @@ namespace FormulaEvaluator
                 if (op.Equals("+"))
                     sum = num1 + num2;
                 else
-                    sum = num1 - num2;
+                    sum = num2 - num1;
                 return sum;
             }
 
@@ -123,6 +123,7 @@ namespace FormulaEvaluator
         /// <param name="s"> string s the operator</param>
         private static void AddOrSubtract(String s)
         {
+            //TODO: Improve readability of this statement
             if(Operator.Count == 0 || !Operator.Peek().Equals("+") || !Operator.Peek().Equals("-"))
                 Operator.Push(s);
             else 
@@ -169,6 +170,7 @@ namespace FormulaEvaluator
             {
                 if (Operator.Peek().Equals("*") || Operator.Peek().Equals("/"))
                 {
+                    //TODO: Pick between recursive Evaluate and if statements
                     String left = Value.Pop().ToString();
                     String right = Value.Pop().ToString();
                     String op = Operator.Pop();
