@@ -2,4 +2,4 @@
 using FormulaEvaluator;
 
 Console.WriteLine("Hello, World!");
-if (Evaluator.Evaluate("5+5", null) == 10) Console.WriteLine("Happy Day!");
+if (Evaluator.Evaluate("25/5", null) == 5) Console.WriteLine("Happy Day!");

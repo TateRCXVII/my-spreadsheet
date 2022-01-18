@@ -54,12 +54,14 @@ namespace FormulaEvaluator
                     //and perform the operation on the current int and popped val int 
                     else if(Operator.Peek() == "*")
                     {
+                        Operator.Pop();
                         int num1 = Value.Pop();
                         int result = val * num1;
                         Value.Push(result);
                     } 
                     else if (Operator.Peek() == "/")
                     {
+                        Operator.Pop();
                         int num1 = Value.Pop();
                         int result = val / num1;
                         Value.Push(result);
