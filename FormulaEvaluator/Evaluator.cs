@@ -24,6 +24,9 @@ namespace FormulaEvaluator
         private static Stack<string> Operator = new Stack<string>();
         private static Stack<int> Value = new Stack<int>();
 
+        //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
+        readonly static Regex VariableRegex = new ("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
+
 
         public delegate int Lookup(String variable_name);
 
@@ -46,32 +49,12 @@ namespace FormulaEvaluator
                 int val = 0;
                 if (int.TryParse(s, out val))
                 {
-                    if(Operator.Count == 0)
-                    {
-                        Value.Push(val);
-                    }
-                    // if multiplication or division is needed, pop the value stack 
-                    //and perform the operation on the current int and popped val int 
-                    else if(Operator.Peek() == "*")
-                    {
-                        Operator.Pop();
-                        int num1 = Value.Pop();
-                        int result = val * num1;
-                        Value.Push(result);
-                    } 
-                    else if (Operator.Peek() == "/")
-                    {
-                        Operator.Pop();
-                        int num1 = Value.Pop();
-                        int result = num1 / val;
-                        Value.Push(result);
-                    }
-                    else
-                        Value.Push(val);
+                    IntegerOrVariable(val);
                 }
-                else if (false)
+                else if (VariableRegex.IsMatch(s))
                 {
                     //TODO: Check if it's a variable
+                    IntegerOrVariable(variableEvaluator(s));
                 }
                 else
                 {
@@ -138,6 +121,32 @@ namespace FormulaEvaluator
                     sum = num1 - num2; //TODO: make sure this is the right order!
                 Value.Push(sum);
             }
+        }
+
+        private static void IntegerOrVariable(int val)
+        {
+            if (Operator.Count == 0)
+            {
+                Value.Push(val);
+            }
+            // if multiplication or division is needed, pop the value stack 
+            //and perform the operation on the current int and popped val int 
+            else if (Operator.Peek() == "*")
+            {
+                Operator.Pop();
+                int num1 = Value.Pop();
+                int result = val * num1;
+                Value.Push(result);
+            }
+            else if (Operator.Peek() == "/")
+            {
+                Operator.Pop();
+                int num1 = Value.Pop();
+                int result = num1 / val;
+                Value.Push(result);
+            }
+            else
+                Value.Push(val);
         }
 
         /// <summary>
