@@ -112,7 +112,7 @@ namespace FormulaEvaluator
             //TODO: Improve readability of this statement
             if(Operator.Count == 0 || !Operator.Peek().Equals("+") || !Operator.Peek().Equals("-"))
                 Operator.Push(s);
-            else 
+            else if (Value.Count >= 2) 
             { 
                 int num1 = Value.Pop();
                 int num2 = Value.Pop();
@@ -124,25 +124,34 @@ namespace FormulaEvaluator
                     sum = num2 - num1;
                 Value.Push(sum);
             }
+            else throw new ArgumentException();
         }
 
+        /// <summary>
+        /// Method to handle integer inputs or variable inputs after lookup
+        /// </summary>
+        /// <param name="val">the integer input</param>
+        /// <exception cref="ArgumentException">Throws argument exception if
+        /// syntax is invalid</exception>
         private static void IntegerOrVariable(int val)
         {
             if (Operator.Count == 0)
-            {
                 Value.Push(val);
-            }
-            // if multiplication or division is needed, pop the value stack 
-            //and perform the operation on the current int and popped val int 
+
             else if (Operator.Peek().Equals("*"))
             {
+                if (Value.Count == 0) throw new ArgumentException();
+
                 Operator.Pop();
                 int num1 = Value.Pop();
                 int result = val * num1;
                 Value.Push(result);
             }
+
             else if (Operator.Peek().Equals("/"))
             {
+                if (Value.Count == 0) throw new ArgumentException();
+
                 Operator.Pop();
                 int num1 = Value.Pop();
                 if(val == 0) throw new ArgumentException();
@@ -160,11 +169,9 @@ namespace FormulaEvaluator
         /// <exception cref="ArgumentException"></exception>
         private static void RightParenthesis(String s)
         {
-            //if + or -, pop the value stack twice and perform the operation
-            //recursively using Evaluate
             if(Operator.Peek().Equals("+") || Operator.Peek().Equals("-"))
             {
-                //todo switch left and right
+                if(Value.Count < 2) throw new ArgumentException();
                 int right = Value.Pop();
                 int left = Value.Pop();
                 String op = Operator.Pop();
@@ -172,17 +179,13 @@ namespace FormulaEvaluator
                     Value.Push(right + left);
                 else
                     Value.Push(right - left);
-                //String expression = left + op + right;
-                //TODO: Test with variables... 
-                //Value.Push(Evaluate(expression, null));
-
             }
-            //if statement needed to handle exception
-            //if the ( doesn't exist, the input is invalid
+
             if (Operator.Peek().Equals("("))
                 Operator.Pop();
             else
                 throw new ArgumentException();
+
             //ensure there is somehting left in the op stack to check/evaluate
             if (Operator.Count > 0)
             {
@@ -191,14 +194,13 @@ namespace FormulaEvaluator
                     int right = Value.Pop();
                     int left = Value.Pop();
                     String op = Operator.Pop();
-                    if(op.Equals("*"))
-                        Value.Push(right*left);
+                    if (op.Equals("*"))
+                        Value.Push(right * left);
                     else
-                        Value.Push(right/left);
-                    //String expression = left + op + right;
-                    //TODO: Test with variables
-                   // Value.Push(Evaluate(expression, null));
-
+                    {
+                        if (left == 0) throw new ArgumentException();
+                        Value.Push(right / left);
+                    }
                 }
             }
             //else throw new ArgumentException();
