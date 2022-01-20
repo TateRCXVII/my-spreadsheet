@@ -49,19 +49,10 @@ namespace FormulaEvaluator
                 int val = 0;
                 if (int.TryParse(s, out val))
                 {
-                    try
-                    {
                         IntegerOrVariable(val);
-                    }
-                    catch (Exception e) 
-                    {
-                        Console.WriteLine(e.ToString() + "invalid syntax");
-                    }
                 }
                 else if (VariableRegex.IsMatch(s))
                 {
-                    //TODO: Check if it's a variable
-                    //?: Wrap this in try catch or just have it throw?
                     IntegerOrVariable(variableEvaluator(s));
                 }
                 else
@@ -90,8 +81,12 @@ namespace FormulaEvaluator
 
                 }
             }
-            if (Operator.Count == 0)
+            if (Operator.Count == 0 && Value.Count > 1)
+                throw new ArgumentException();
+            else if (Operator.Count == 0)
                 return Value.Pop();
+            else if (Value.Count < 2)
+                throw new ArgumentException();
             //perform + or - operation
             else
             {
@@ -100,7 +95,7 @@ namespace FormulaEvaluator
                 int sum = 0;
                 string op = Operator.Pop();
                 if (op.Equals("+"))
-                    sum = num1 + num2;
+                    sum = num2 + num1;
                 else
                     sum = num2 - num1;
                 return sum;
@@ -139,14 +134,14 @@ namespace FormulaEvaluator
             }
             // if multiplication or division is needed, pop the value stack 
             //and perform the operation on the current int and popped val int 
-            else if (Operator.Peek() == "*")
+            else if (Operator.Peek().Equals("*"))
             {
                 Operator.Pop();
                 int num1 = Value.Pop();
                 int result = val * num1;
                 Value.Push(result);
             }
-            else if (Operator.Peek() == "/")
+            else if (Operator.Peek().Equals("/"))
             {
                 Operator.Pop();
                 int num1 = Value.Pop();
@@ -169,12 +164,17 @@ namespace FormulaEvaluator
             //recursively using Evaluate
             if(Operator.Peek().Equals("+") || Operator.Peek().Equals("-"))
             {
-                String left = Value.Pop().ToString();
-                String right = Value.Pop().ToString();
+                //todo switch left and right
+                int right = Value.Pop();
+                int left = Value.Pop();
                 String op = Operator.Pop();
-                String expression = left + op + right;
+                if (op.Equals("+"))
+                    Value.Push(right + left);
+                else
+                    Value.Push(right - left);
+                //String expression = left + op + right;
                 //TODO: Test with variables... 
-                Value.Push(Evaluate(expression, null));
+                //Value.Push(Evaluate(expression, null));
 
             }
             //if statement needed to handle exception
@@ -188,17 +188,20 @@ namespace FormulaEvaluator
             {
                 if (Operator.Peek().Equals("*") || Operator.Peek().Equals("/"))
                 {
-                    //TODO: Pick between recursive Evaluate and if statements
-                    String left = Value.Pop().ToString();
-                    String right = Value.Pop().ToString();
+                    int right = Value.Pop();
+                    int left = Value.Pop();
                     String op = Operator.Pop();
-                    String expression = left + op + right;
+                    if(op.Equals("*"))
+                        Value.Push(right*left);
+                    else
+                        Value.Push(right/left);
+                    //String expression = left + op + right;
                     //TODO: Test with variables
-                    Value.Push(Evaluate(expression, null));
+                   // Value.Push(Evaluate(expression, null));
 
                 }
             }
-            else throw new ArgumentException();
+            //else throw new ArgumentException();
         }
     }
 }
