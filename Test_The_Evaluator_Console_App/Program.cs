@@ -19,3 +19,14 @@ static int VariableEvaluator(string s)
         return 2;
     else return 0;
 }
+
+static void TestEvaluate()
+{
+    try
+    {
+
+    } catch(ArgumentException e)
+    {
+        Console.WriteLine(e.Message + "Syntax error or divide by 0");
+    }
+}
