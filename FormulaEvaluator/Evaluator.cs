@@ -119,9 +119,9 @@ namespace FormulaEvaluator
                 int sum = 0;
                 string op = Operator.Pop();
                 if(op.Equals("+"))
-                    sum = num1 + num2;
+                    sum = num2 + num1;
                 else
-                    sum = num1 - num2; //TODO: make sure this is the right order!
+                    sum = num2 - num1;
                 Value.Push(sum);
             }
         }
