@@ -49,11 +49,19 @@ namespace FormulaEvaluator
                 int val = 0;
                 if (int.TryParse(s, out val))
                 {
-                    IntegerOrVariable(val);
+                    try
+                    {
+                        IntegerOrVariable(val);
+                    }
+                    catch (Exception e) 
+                    {
+                        Console.WriteLine(e.ToString() + "invalid syntax");
+                    }
                 }
                 else if (VariableRegex.IsMatch(s))
                 {
                     //TODO: Check if it's a variable
+                    //?: Wrap this in try catch or just have it throw?
                     IntegerOrVariable(variableEvaluator(s));
                 }
                 else
@@ -142,6 +150,7 @@ namespace FormulaEvaluator
             {
                 Operator.Pop();
                 int num1 = Value.Pop();
+                if(val == 0) throw new ArgumentException();
                 int result = num1 / val;
                 Value.Push(result);
             }
@@ -153,6 +162,7 @@ namespace FormulaEvaluator
         /// Method to handle if the string is ")"
         /// </summary>
         /// <param name="s"> string s the operator</param>
+        /// <exception cref="ArgumentException"></exception>
         private static void RightParenthesis(String s)
         {
             //if + or -, pop the value stack twice and perform the operation
@@ -172,8 +182,7 @@ namespace FormulaEvaluator
             if (Operator.Peek().Equals("("))
                 Operator.Pop();
             else
-                //throw exception
-                return;
+                throw new ArgumentException();
             //ensure there is somehting left in the op stack to check/evaluate
             if (Operator.Count > 0)
             {
@@ -189,6 +198,7 @@ namespace FormulaEvaluator
 
                 }
             }
+            else throw new ArgumentException();
         }
     }
 }
