@@ -40,65 +40,67 @@ namespace FormulaEvaluator
         /// <returns> the result of the infix expression</returns>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
+            if(expression == null) throw new ArgumentException("Null expression error.");
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             //iterate through the substrings and perform operations accordingly
-            foreach (string s in substrings)
+            foreach (string token in substrings)
             {
+                if (token.Equals(" ") || token.Equals("")) continue;
 
-                //if it's an integer
+                string eqnPart = token.Trim();
+
                 int val = 0;
-                if (int.TryParse(s, out val))
+                if (int.TryParse(eqnPart, out val))
                 {
-                        IntegerOrVariable(val);
+                    if (val < 0) throw new ArgumentException("Negative numbers not allowed.");
+                    IntegerOrVariable(val);
                 }
-                else if (VariableRegex.IsMatch(s))
+                else if (VariableRegex.IsMatch(eqnPart))
                 {
-                    IntegerOrVariable(variableEvaluator(s));
+                    IntegerOrVariable(variableEvaluator(eqnPart));
                 }
                 else
                 {
-                    switch(s)
+                    switch(eqnPart)
                     {
                         case "+":
-                            AddOrSubtract(s);
+                            AddOrSubtractOperator(eqnPart);
                             break;
                         case "-":
-                            AddOrSubtract(s);
+                            AddOrSubtractOperator(eqnPart);
                             break;
                         case "*":
-                            Operator.Push(s);
+                            Operator.Push(eqnPart);
                             break;
                         case "/":
-                            Operator.Push(s);
+                            Operator.Push(eqnPart);
                             break;
                         case "(":
-                            Operator.Push(s);
+                            Operator.Push(eqnPart);
                             break;
                         case ")":
-                            RightParenthesis(s);
+                            RightParenthesis(eqnPart);
                             break;
+
+                        default:
+                            throw new ArgumentException("Invalid expression input.");
                     }
 
                 }
             }
+
             if (Operator.Count == 0 && Value.Count > 1)
-                throw new ArgumentException();
+                throw new ArgumentException("Value stack has too many values.");
             else if (Operator.Count == 0)
                 return Value.Pop();
             else if (Value.Count < 2)
-                throw new ArgumentException();
-            //perform + or - operation
+                throw new ArgumentException("Value stack doesn't have enough values.");
+
             else
             {
-                int num1 = Value.Pop();
-                int num2 = Value.Pop();
-                int sum = 0;
-                string op = Operator.Pop();
-                if (op.Equals("+"))
-                    sum = num2 + num1;
-                else
-                    sum = num2 - num1;
-                return sum;
+                int right = Value.Pop();
+                int left = Value.Pop();
+                return AddOrSubtract(left, right);
             }
 
         }
@@ -107,24 +109,34 @@ namespace FormulaEvaluator
         /// Method to handle if the string is + or -
         /// </summary>
         /// <param name="s"> string s the operator</param>
-        private static void AddOrSubtract(String s)
+        private static void AddOrSubtractOperator(String s)
         {
-            //TODO: Improve readability of this statement
-            if(Operator.Count == 0 || !Operator.Peek().Equals("+") || !Operator.Peek().Equals("-"))
+            if(!Operator.HasOnTop("+")||!Operator.HasOnTop("-")||Operator.IsEmpty())
                 Operator.Push(s);
             else if (Value.Count >= 2) 
             { 
-                int num1 = Value.Pop();
-                int num2 = Value.Pop();
-                int sum = 0;
-                string op = Operator.Pop();
-                if(op.Equals("+"))
-                    sum = num2 + num1;
-                else
-                    sum = num2 - num1;
-                Value.Push(sum);
+                int right = Value.Pop();
+                int left = Value.Pop();
+                Value.Push(AddOrSubtract(left, right));
             }
-            else throw new ArgumentException();
+            else throw new ArgumentException("Invalid input: Unable to perform addition or subtraction.");
+        }
+
+        /// <summary>
+        /// Helper method for addition or subtraction problems
+        /// </summary>
+        /// <param name="right">right integer in expression</param>
+        /// <param name="left">left integer in expression</param>
+        /// <returns>returns the sum of the right and left integers</returns>
+        private static int AddOrSubtract(int left, int right)
+        {
+            int sum = 0;
+            string op = Operator.Pop();
+            if (op.Equals("+"))
+                sum = left + right;
+            else
+                sum = left - right;
+            return sum;
         }
 
         /// <summary>
@@ -132,33 +144,17 @@ namespace FormulaEvaluator
         /// </summary>
         /// <param name="val">the integer input</param>
         /// <exception cref="ArgumentException">Throws argument exception if
-        /// syntax is invalid</exception>
+        /// syntax is invalid or dividing by 0</exception>
         private static void IntegerOrVariable(int val)
         {
-            if (Operator.Count == 0)
-                Value.Push(val);
-
-            else if (Operator.Peek().Equals("*"))
+           if(Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
-                if (Value.Count == 0) throw new ArgumentException();
-
-                Operator.Pop();
-                int num1 = Value.Pop();
-                int result = val * num1;
-                Value.Push(result);
+                if (Value.IsEmpty()) throw new ArgumentException("No values to multiply or divide, invalid input.");
+                int right = val;
+                int left = Value.Pop();
+                Value.Push(MultiplyOrDivide(left, right));
             }
-
-            else if (Operator.Peek().Equals("/"))
-            {
-                if (Value.Count == 0) throw new ArgumentException();
-
-                Operator.Pop();
-                int num1 = Value.Pop();
-                if(val == 0) throw new ArgumentException();
-                int result = num1 / val;
-                Value.Push(result);
-            }
-            else
+           else
                 Value.Push(val);
         }
 
@@ -166,44 +162,80 @@ namespace FormulaEvaluator
         /// Method to handle if the string is ")"
         /// </summary>
         /// <param name="s"> string s the operator</param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException"> Throws if input is invalid</exception>
         private static void RightParenthesis(String s)
         {
-            if(Operator.Peek().Equals("+") || Operator.Peek().Equals("-"))
+            if(Operator.HasOnTop("+") || Operator.HasOnTop("-"))
             {
-                if(Value.Count < 2) throw new ArgumentException();
+                if(Value.Count < 2) throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
+
                 int right = Value.Pop();
                 int left = Value.Pop();
-                String op = Operator.Pop();
-                if (op.Equals("+"))
-                    Value.Push(right + left);
-                else
-                    Value.Push(right - left);
+                Value.Push(AddOrSubtract(left, right));
             }
 
             if (Operator.Peek().Equals("("))
                 Operator.Pop();
             else
-                throw new ArgumentException();
+                throw new ArgumentException("Expression wasn't opened with a parenthesis '('.");
 
-            //ensure there is somehting left in the op stack to check/evaluate
-            if (Operator.Count > 0)
+            if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
-                if (Operator.Peek().Equals("*") || Operator.Peek().Equals("/"))
-                {
-                    int right = Value.Pop();
-                    int left = Value.Pop();
-                    String op = Operator.Pop();
-                    if (op.Equals("*"))
-                        Value.Push(right * left);
-                    else
-                    {
-                        if (left == 0) throw new ArgumentException();
-                        Value.Push(right / left);
-                    }
-                }
+                int right = Value.Pop();
+                int left = Value.Pop();
+                Value.Push(MultiplyOrDivide(left, right));
             }
-            //else throw new ArgumentException();
+        }
+
+        /// <summary>
+        /// Helper method to perform multiplication or division operations
+        /// </summary>
+        /// <param name="left"> the left integer</param>
+        /// <param name="right"> the right integer </param>
+        /// <returns>the product or quotient of the operation</returns>
+        /// <exception cref="ArgumentException"> Throws if dividing by zero </exception>
+        private static int MultiplyOrDivide(int left, int right)
+        {
+            String op = Operator.Pop();
+            if (op.Equals("*"))
+                return left * right;
+            else
+            {
+                if (right == 0) throw new ArgumentException("Divide by zero error.");
+                return left / right;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Extension class for the evaluator class
+    /// </summary>
+    public static class EvaluatorExtensions
+    {
+        /// <summary>
+        /// Extension for checking if a value is present at the top of the stack
+        /// </summary>
+        /// <typeparam name="T"> int or string value in stack</typeparam>
+        /// <param name="stack">stack to be checked</param>
+        /// <param name="value">the value being checked</param>
+        /// <returns> true if the value is on top, false otherwise</returns>
+        public static bool HasOnTop<T>(this Stack<T> stack, T value)
+        {
+            if (!stack.IsEmpty() && stack.Peek().Equals(value))
+                return true;
+            return false;
+
+        }
+
+        /// <summary>
+        /// Extension to check if the stack is empty
+        /// </summary>
+        /// <typeparam name="T">Type in the stack</typeparam>
+        /// <param name="stack">Stack to be checked</param>
+        /// <returns>true if stack is empty, false otherwise </returns>
+        public static bool IsEmpty<T>(this Stack<T> stack)
+        {
+            return stack.Count == 0;
         }
     }
 }
