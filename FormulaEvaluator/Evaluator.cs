@@ -13,17 +13,18 @@ namespace FormulaEvaluator
     /// another source.  All references used in the completion of the assignment are cited in my README file. 
     /// 
     /// File Contents 
+    /// - Evaluate method to evaluate expressions.
+    /// - A series of helper methods to perform said operations.
+    /// - Extensions to the Stack class.
     /// 
-    /// This namespace and class is a formula evaluator using RegEx and delegates. 
+    /// This namespace and class is a formula evaluator using RegEx and delegates. The class contains a
+    /// method, Evaluate, which evaluates an input string expression ("5+5/10") using standard order of 
+    /// operations. It can also take variable inputs in the expression ("5+X1/10"), however variables must
+    /// be one or more letters followed by one or more numbers. The variable lookup is handled with an input delegate 
+    /// function passed as a parameter.
     /// </summary>
     public class Evaluator
     {
-        /// <summary>
-        /// stacks used for the infix operations
-        /// </summary>
-        private static Stack<string> Operator = new Stack<string>();
-        private static Stack<int> Value = new Stack<int>();
-
         //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
         readonly static Regex VariableRegex = new ("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
 
@@ -31,15 +32,26 @@ namespace FormulaEvaluator
         public delegate int Lookup(String variable_name);
 
         /// <summary>
-        /// This function takes in a string arithmetic expression and evaluates it.
+        /// This function takes in a string arithmetic expression and evaluates it. Variables are possible if
+        /// the method is provided a lookup delegate function defined by the user of this method.
         /// </summary>
-        /// <param name="expression"> a string expression including (,),+,-,*,/,int,or string variables
-        /// i.e. (5*2)/6+X
+        /// <param name="expression"> a string expression including (,),+,-,*,/,int,or variables
+        /// i.e. (5*2)/6+X1
+        /// Variables are defined as at least one letter followed by at least one number.
+        /// i.e. ABC123 is allowed while 1A3B is not.
         /// </param>
         /// <param name="variableEvaluator"> a delegate used for looking up input string variables</param>
-        /// <returns> the result of the infix expression</returns>
+        /// <returns> the integer result of the infix expression</returns>
+        /// <exception cref="ArgumentException"> 
+        /// If the expression is invalid or the operation is invalid, 
+        /// an argument excpetion will be thrown
+        /// </exception>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
+
+        Stack<string> Operator = new Stack<string>();
+        Stack<int> Value = new Stack<int>();
+
             if(expression == null) throw new ArgumentException("Null expression error.");
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             //iterate through the substrings and perform operations accordingly
@@ -52,22 +64,22 @@ namespace FormulaEvaluator
                 int val = 0;
                 if (int.TryParse(eqnPart, out val))
                 {
-                    if (val < 0) throw new ArgumentException("Negative numbers not allowed.");
-                    IntegerOrVariable(val);
+                    if (val < 0)
+                        throw new ArgumentException("Negative numbers not allowed.");
+
+                    IntegerOrVariable(val, Operator, Value);
                 }
                 else if (VariableRegex.IsMatch(eqnPart))
-                {
-                    IntegerOrVariable(variableEvaluator(eqnPart));
-                }
+                    IntegerOrVariable(variableEvaluator(eqnPart), Operator, Value);
                 else
                 {
                     switch(eqnPart)
                     {
                         case "+":
-                            AddOrSubtractOperator(eqnPart);
+                            AddOrSubtractOperator(eqnPart, Operator, Value);
                             break;
                         case "-":
-                            AddOrSubtractOperator(eqnPart);
+                            AddOrSubtractOperator(eqnPart, Operator, Value);
                             break;
                         case "*":
                             Operator.Push(eqnPart);
@@ -79,7 +91,7 @@ namespace FormulaEvaluator
                             Operator.Push(eqnPart);
                             break;
                         case ")":
-                            RightParenthesis(eqnPart);
+                            RightParenthesis(Operator, Value);
                             break;
 
                         default:
@@ -90,46 +102,48 @@ namespace FormulaEvaluator
             }
 
             if (Operator.Count == 0 && Value.Count > 1)
-                throw new ArgumentException("Value stack has too many values.");
+                throw new ArgumentException("Value stack has too many values .");
             else if (Operator.Count == 0)
                 return Value.Pop();
             else if (Value.Count < 2)
                 throw new ArgumentException("Value stack doesn't have enough values.");
-
+            else if (Operator.Count > 1)
+                throw new ArgumentException("Check for negative numbers.");
             else
-            {
-                int right = Value.Pop();
-                int left = Value.Pop();
-                return AddOrSubtract(left, right);
-            }
+                return AddOrSubtract(Value, Operator);
 
         }
 
         /// <summary>
-        /// Method to handle if the string is + or -
+        /// Helper method to handle when the + or - operators are encountered
         /// </summary>
-        /// <param name="s"> string s the operator</param>
-        private static void AddOrSubtractOperator(String s)
+        /// <param name="s">Current operator (either + or -)</param>
+        /// <param name="Operator">Stack of operators</param>
+        /// <param name="Value">Stack of values</param>
+        private static void AddOrSubtractOperator(String s, Stack<string> Operator, Stack<int> Value)
         {
-            if(!Operator.HasOnTop("+")||!Operator.HasOnTop("-")||Operator.IsEmpty())
-                Operator.Push(s);
-            else if (Value.Count >= 2) 
-            { 
-                int right = Value.Pop();
-                int left = Value.Pop();
-                Value.Push(AddOrSubtract(left, right));
-            }
-            else throw new ArgumentException("Invalid input: Unable to perform addition or subtraction.");
+            if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
+                Value.Push(AddOrSubtract(Value, Operator));
+
+            Operator.Push(s);
         }
 
         /// <summary>
-        /// Helper method for addition or subtraction problems
+        /// A helper method to perform addition or subtraction from a value stack and operator stack
         /// </summary>
-        /// <param name="right">right integer in expression</param>
-        /// <param name="left">left integer in expression</param>
-        /// <returns>returns the sum of the right and left integers</returns>
-        private static int AddOrSubtract(int left, int right)
+        /// <param name="Value">Stack of values</param>
+        /// <param name="Operator">Stack of operators</param>
+        /// <returns> the result of summing the top two values with + or - </returns>
+        /// <exception cref="ArgumentException">
+        /// If there aren't enough values on the value stack, an error is thrown.
+        /// </exception>
+        private static int AddOrSubtract(Stack<int> Value, Stack<string> Operator)
         {
+            if (Value.Count < 2)
+                throw new ArgumentException("Can't perform operation: Not enough integers");
+
+            int right = Value.Pop();
+            int left = Value.Pop();
             int sum = 0;
             string op = Operator.Pop();
             if (op.Equals("+"))
@@ -139,69 +153,83 @@ namespace FormulaEvaluator
             return sum;
         }
 
+ 
         /// <summary>
-        /// Method to handle integer inputs or variable inputs after lookup
+        /// A helper method to handle if an input is an integer or a variable.
         /// </summary>
-        /// <param name="val">the integer input</param>
-        /// <exception cref="ArgumentException">Throws argument exception if
-        /// syntax is invalid or dividing by 0</exception>
-        private static void IntegerOrVariable(int val)
+        /// <param name="val">The value being handled, which represents the right value in operations.</param>
+        /// <param name="Operator"> Stack of operators</param>
+        /// <param name="Value">Stack of values</param>
+        /// <exception cref="ArgumentException">
+        /// If there aren't values to perform operations on, an error is thrown.
+        /// </exception>
+        private static void IntegerOrVariable(int val, Stack<string> Operator, Stack<int> Value)
         {
            if(Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
-                if (Value.IsEmpty()) throw new ArgumentException("No values to multiply or divide, invalid input.");
-                int right = val;
-                int left = Value.Pop();
-                Value.Push(MultiplyOrDivide(left, right));
+                if (Value.IsEmpty())
+                    throw new ArgumentException("No values to multiply or divide, invalid input.");
+
+                Value.Push(val);
+                Value.Push(MultiplyOrDivide(Operator, Value));
             }
            else
                 Value.Push(val);
         }
 
+
         /// <summary>
-        /// Method to handle if the string is ")"
+        /// Helper method to handle the operations which accompany a ")"
         /// </summary>
-        /// <param name="s"> string s the operator</param>
-        /// <exception cref="ArgumentException"> Throws if input is invalid</exception>
-        private static void RightParenthesis(String s)
+        /// <param name="Operator">Operator stack</param>
+        /// <param name="Value">Value stack</param>
+        /// <exception cref="ArgumentException">
+        /// If there aren't enough values in the value stack or the input has invalid syntax,
+        /// an argument exception will be thrown.
+        /// </exception>
+        private static void RightParenthesis(Stack<string> Operator, Stack<int> Value)
         {
             if(Operator.HasOnTop("+") || Operator.HasOnTop("-"))
             {
-                if(Value.Count < 2) throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
-
-                int right = Value.Pop();
-                int left = Value.Pop();
-                Value.Push(AddOrSubtract(left, right));
+                if (Value.Count < 2)
+                    throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
+                Value.Push(AddOrSubtract(Value, Operator));
             }
 
-            if (Operator.Peek().Equals("("))
+            if (Operator.HasOnTop("("))
                 Operator.Pop();
             else
                 throw new ArgumentException("Expression wasn't opened with a parenthesis '('.");
 
             if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
-            {
-                int right = Value.Pop();
-                int left = Value.Pop();
-                Value.Push(MultiplyOrDivide(left, right));
-            }
+                Value.Push(MultiplyOrDivide(Operator, Value));
         }
 
         /// <summary>
-        /// Helper method to perform multiplication or division operations
+        /// Helper method to handle multiplication and division and its accompanying errors.
         /// </summary>
-        /// <param name="left"> the left integer</param>
-        /// <param name="right"> the right integer </param>
-        /// <returns>the product or quotient of the operation</returns>
-        /// <exception cref="ArgumentException"> Throws if dividing by zero </exception>
-        private static int MultiplyOrDivide(int left, int right)
+        /// <param name="Operator">The Operator Stack</param>
+        /// <param name="Value">The Value Stack</param>
+        /// <returns>returns the result of the multiplication or division of two integers</returns>
+        /// <exception cref="ArgumentException">
+        /// If the value stack doesn't have enough integers or a division by 0 occurs, an error is thrown.
+        /// </exception>
+        private static int MultiplyOrDivide(Stack<string> Operator, Stack<int> Value)
         {
+            if (Value.Count < 2)
+                throw new ArgumentException("Not enough integers to perform operation. Check for negative numbers.");
+
+            int right = Value.Pop();
+            int left = Value.Pop();
             String op = Operator.Pop();
             if (op.Equals("*"))
                 return left * right;
             else
             {
-                if (right == 0) throw new ArgumentException("Divide by zero error.");
+                if (right == 0)
+                {
+                    throw new ArgumentException("Divide by zero error.");
+                }
                 return left / right;
             }
         }
@@ -209,6 +237,8 @@ namespace FormulaEvaluator
 
     /// <summary>
     /// Extension class for the evaluator class
+    /// 
+    /// Contains extensions to check if stack is empty and to check if an operator is on top.
     /// </summary>
     public static class EvaluatorExtensions
     {
