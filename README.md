@@ -13,8 +13,10 @@ Copyright:  CS 3500 and Tate - This work may not be copied for use in Academic C
 # Overview of the Spreadsheet functionality
 
 The Spreadsheet program is currently capable of evaluating formulas
-Future extensions are ...
+Future extensions are:  
+- GUI
+- Dependency graph
 
 # Time Expenditures:
 
-    1. Assignment One:   Predicted Hours:          10        Actual Hours:       
+    1. Assignment One:   Predicted Hours:          10        Actual Hours:     11   
