@@ -5,7 +5,7 @@ Date:       18-Jan-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
 Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII/tree/master/FormulaEvaluator
-Commit #:   7fe6edf365b6fe650e953093ad8a8c6f64b8b7c9
+Commit #:   cbe317e473c667b6af7c03097571053cd0aabcc9
 Project:    Formula Evaluator
 Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in Academic Coursework.
 ```
