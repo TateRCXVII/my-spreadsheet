@@ -1,7 +1,7 @@
 ```
 Author:     Tate Reynolds
 Partner:    None
-Date:       13-Jan-2022
+Date:       23-Jan-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
 Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII
@@ -12,11 +12,13 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 
 # Overview of the Spreadsheet functionality
 
-The Spreadsheet program is currently capable of evaluating formulas
+Spreadsheet project current capabilities:
+- Evaluating formulas
 Future extensions are:  
 - GUI
 - Dependency graph
 
 # Time Expenditures:
 
-    1. Assignment One:   Predicted Hours:          10        Actual Hours:     11   
+    1. Assignment One:   Predicted Hours:          10        Actual Hours:     11       Notes: Found an error on Friday night and spent extra time fixing bugs.
+    2. Assignment Two:   Predicted Hours:          10        Actual Hours:              Notes:
