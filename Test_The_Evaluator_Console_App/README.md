@@ -14,18 +14,10 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 The work in this test suite stands on its own
 
 # Assignment Specific Topics
-Any additional feedback or write up required by the assignment.
 
-Leave a space for a new paragraph.
-
-Make sure you spell check your file (did you install the VS spell checker?) and use your best writing ability.
 
 # Consulted Peers:
 Sanjay Gounder
 
 
 # References:
-
-    1. C# Regex Documentation - https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
-    2. C# Delegates Explained (YouTube) - https://www.youtube.com/watch?v=ifbYA8hyvjc
-    3. Title of page - URL
