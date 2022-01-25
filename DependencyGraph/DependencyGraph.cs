@@ -30,7 +30,7 @@ namespace SpreadsheetUtilities
     ///    (2) If s is a string, the set of all strings t such that (t,s) is in DG is
     ///called dependees(s).
     ///        (The set of things that s depends on) 
-    //
+    ///
     /// For example, suppose DG = {("a", "b"), ("a", "c"), ("b", "d"), ("d", "d")}
     ///     dependents("a") = {"b", "c"}
     ///     dependents("b") = {"d"}
@@ -43,18 +43,24 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
+        private Dictionary<string, HashSet<string>> Dependents;
+        private Dictionary<string, HashSet<string>> Dependees;
+
+
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
+            Dependees = new Dictionary<string, HashSet<string>>();
+            Dependents = new Dictionary<string, HashSet<string>>();
         }
         /// <summary>
         /// The number of ordered pairs in the DependencyGraph.
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return Dependents.Count; }
         }
         /// <summary>
         /// The size of dependees(s).
@@ -66,21 +72,21 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return 0; }
+            get { return Dependees[s].Count; }
         }
         /// <summary>
         /// Reports whether dependents(s) is non-empty.
         /// </summary>
         public bool HasDependents(string s)
         {
-            return false;
+            return Dependents.ContainsKey(s);
         }
         /// <summary>
         /// Reports whether dependees(s) is non-empty.
         /// </summary>
         public bool HasDependees(string s)
         {
-            return false;
+            return Dependees.ContainsKey(s);
         }
         /// <summary>
         /// Enumerates dependents(s).
@@ -108,6 +114,9 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            //TODO: Throw exception
+            //TODO: Edit dependees
+            Dependents[s].Add(t);
         }
         /// <summary>
         /// Removes the ordered pair (s,t), if it exists
@@ -116,6 +125,9 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            //TODO: Throw exceptions
+            //TODO: Edit dependees
+            Dependents[s].Remove(t);
         }
         /// <summary>
         /// Removes all existing ordered pairs of the form (s,r).  Then, for each
@@ -123,6 +135,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            //TODO: Throw exceptions
+            //TODO: Edit dependees
+            Dependents[s].Clear();
+            foreach (string t in newDependents)
+                Dependents[s].Add(t);
         }
         /// <summary>
         /// Removes all existing ordered pairs of the form (r,s).  Then, for each 
@@ -130,6 +147,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            //TODO: Throw exceptions
+            //TODO: Edit dependencies
+            Dependees[s].Clear();
+            foreach (string t in newDependees)
+                Dependees[s].Add(t);
         }
     }
 }
