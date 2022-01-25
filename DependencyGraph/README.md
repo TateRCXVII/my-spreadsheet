@@ -35,11 +35,13 @@ I learned a lot about C#, delegates, exception handling, and overall algorithm d
 
 
 # Consulted Peers:
-
+Thatcher Geary
+Sanjay Gounder
+Shad
 
 # References:
 
-    1. C# Regex Documentation - https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
+    1. C# Access Dictionary With Key - https://stackoverflow.com/questions/12169443/get-dictionary-value-by-key
     2. C# Delegates Explained (YouTube) - https://www.youtube.com/watch?v=ifbYA8hyvjc
     3. C# Generics - https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
     4. C# Extensions - https://www.tutorialsteacher.com/csharp/csharp-extension-method
