@@ -14,9 +14,10 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 
 Spreadsheet project current capabilities:
 - Evaluating formulas
+- Dependency graphs
 Future extensions are:  
 - GUI
-- Dependency graph
+- Graph loop exception catching
 
 # Time Expenditures:
 
