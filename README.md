@@ -11,7 +11,6 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 ```
 
 # Overview of the Spreadsheet functionality
-
 Spreadsheet project current capabilities:
 - Evaluating formulas
 - Dependency graphs
@@ -22,4 +21,4 @@ Future extensions are:
 # Time Expenditures:
 
     1. Assignment One:   Predicted Hours:          10        Actual Hours:     11       Notes: Found an error on Friday night and spent extra time fixing bugs.
-    2. Assignment Two:   Predicted Hours:          10        Actual Hours:              Notes:
+    2. Assignment Two:   Predicted Hours:          10        Actual Hours:              Notes: Analysis took a lot of understanding the tests. After that, however, things were fairly simple.

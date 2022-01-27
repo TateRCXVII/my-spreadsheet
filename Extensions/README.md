@@ -11,20 +11,10 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 ```
 
 # Comments to Evaluators:
-
-
-# Assignment Specific Topics
-
-
-
+Extensions will be added as the Spreadsheet project continues.
+My next TODO is to add the stack extensions used in the formula evaluator to the overall extensions class.
 
 # Consulted Peers:
 
 
 # References:
-
-    1. C# Regex Documentation - https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
-    2. C# Delegates Explained (YouTube) - https://www.youtube.com/watch?v=ifbYA8hyvjc
-    3. C# Generics - https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
-    4. C# Extensions - https://www.tutorialsteacher.com/csharp/csharp-extension-method
-    5. Trimming strings - https://kodify.net/csharp/strings/remove-whitespace/
