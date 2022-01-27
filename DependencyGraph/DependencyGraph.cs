@@ -75,7 +75,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         { 
-            get { return Dependees[s].Count; }
+            get 
+            {
+                if (!Dependents.ContainsKey(s))
+                    return 0;
+                return Dependees[s].Count; 
+            }
         }
 
 
@@ -195,7 +200,10 @@ namespace SpreadsheetUtilities
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
             foreach (string r in Dependees[s])
+            {
                 Dependents[r].Remove(s);
+                dependencyCount--;
+            }
 
             Dependees[s].Clear();
 
