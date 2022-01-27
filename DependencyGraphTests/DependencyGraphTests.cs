@@ -307,7 +307,6 @@ namespace DevelopmentTests
             // A bunch of strings to use
             const int SIZE = 200;
             string[] letters = new string[SIZE];
-
             for (int i = 0; i < SIZE; i++)
                 letters[i] = ("" + (char)('a' + i));
 
@@ -320,7 +319,26 @@ namespace DevelopmentTests
             Assert.AreEqual(SIZE - 2, t["b"]);
             Assert.AreEqual(SIZE - 3, t["c"]);
             Assert.AreEqual(SIZE - 4, t["d"]);
+            Assert.AreEqual(0, t["asdf"]);
+        }
 
+        [TestMethod()]
+        public void TestDependeesSizeNoKey()
+        {
+            // Dependency graph
+            DependencyGraph t = new DependencyGraph();
+            // A bunch of strings to use
+            const int SIZE = 200;
+            string[] letters = new string[SIZE];
+            for (int i = 0; i < SIZE; i++)
+                letters[i] = ("" + (char)('a' + i));
+
+            // Add a bunch of dependencies
+            for (int i = 0; i < SIZE; i++)
+                for (int j = i + 1; j < SIZE; j++)
+                    t.AddDependency(letters[j], letters[i]);
+
+            Assert.AreEqual(0, t["asdf"]);
         }
 
         //indirectly testing haspair helper method branch
@@ -334,6 +352,20 @@ namespace DevelopmentTests
             t.AddDependency("b", "d");
             t.RemoveDependency("a", "b");
             t.RemoveDependency("n", "c");
+
+            Assert.AreEqual(3, t.Size);
+        }
+
+        [TestMethod()]
+        public void RemoveDependencyAfterReplace()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+            t.ReplaceDependents("b", new HashSet<string>());
+            t.RemoveDependency("b", "c");
 
             Assert.AreEqual(3, t.Size);
         }
