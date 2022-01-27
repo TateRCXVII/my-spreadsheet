@@ -50,12 +50,14 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
+        /// 
         public DependencyGraph()
         {
             Dependees = new Dictionary<string, HashSet<string>>();
             Dependents = new Dictionary<string, HashSet<string>>();
             dependencyCount = 0;
         }
+
         /// <summary>
         /// The number of ordered pairs in the DependencyGraph.
         /// </summary>
@@ -63,11 +65,11 @@ namespace SpreadsheetUtilities
         {
             get { return dependencyCount; }
         }
+
         /// <summary>
         /// The size of dependees(s).
-        /// This property is an example of an indexer.  If dg is a DependencyGraph, you
-        ///would
-        /// invoke it like this:
+        /// This property is an example of an indexer.  If dg is a DependencyGraph, you 
+        /// would invoke it like this:
         /// dg["a"]
         /// It should return the size of dependees("a")
         /// </summary>
@@ -75,38 +77,52 @@ namespace SpreadsheetUtilities
         { 
             get { return Dependees[s].Count; }
         }
+
+
         /// <summary>
-        /// Reports whether dependents(s) is non-empty.
+        /// Reports whether the dependency at string s is not empty
         /// </summary>
+        /// <param name="s">the dependent to cehck</param>
+        /// <returns>true if there is a dependency with the given string, false otherwise</returns>
         public bool HasDependents(string s)
         {
             if(Dependents.ContainsKey(s))
                 return Dependents[s].Count > 0;
             return false;
         }
+
         /// <summary>
-        /// Reports whether dependees(s) is non-empty.
+        /// Reports whether the dependee at string s is not empty
         /// </summary>
+        /// <param name="s">The dependee to be checked</param>
+        /// <returns> true if s has dependees, false otherwise </returns>
         public bool HasDependees(string s)
         {
             if(Dependees.ContainsKey(s))
                 return Dependees[s].Count > 0;
             return false;
         }
+
         /// <summary>
-        /// Enumerates dependents(s).
+        /// Enumerates Dependents given a string
         /// </summary>
+        /// <param name="s">string key to enumerate dependents</param>
+        /// <returns>The IEnumerable object which contains the dependents</returns>
         public IEnumerable<string> GetDependents(string s)
         {
             return Dependents[s];
         }
+
         /// <summary>
-        /// Enumerates dependees(s).
+        /// Enumerates Dependees given a string
         /// </summary>
+        /// <param name="s">string key to enumerate dependees</param>
+        /// <returns>The IEnumerable object which contains the dependees</returns>
         public IEnumerable<string> GetDependees(string s)
         {
             return Dependees[s];
         }
+
         /// <summary>
         /// <para>Adds the ordered pair (s,t), if it doesn't exist</para>
         /// 
@@ -138,15 +154,14 @@ namespace SpreadsheetUtilities
                 dependencyCount++;
             }
         }
+
         /// <summary>
         /// Removes the ordered pair (s,t), if it exists
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="t"></param>
+        /// <param name="s">the dependent of the pair (s must be evaluated before t)</param>
+        /// <param name="t">the dependee of the pair (t cannot be evaluated until s is)</param>
         public void RemoveDependency(string s, string t)
         {
-            //TODO: Throw exceptions
-            //TODO: Edit dependees
             if (HasPair(s, t))
             {
                 Dependees[t].Remove(s);
@@ -155,10 +170,13 @@ namespace SpreadsheetUtilities
             }
 
         }
+
         /// <summary>
         /// Removes all existing ordered pairs of the form (s,r).  Then, for each
         /// t in newDependents, adds the ordered pair (s,t).
         /// </summary>
+        ///<param name="s">the dependent key to have all dependents removed</param>
+        /// <param name="newDependents">an IEnumerable object that contains the new dependents</param>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
             foreach (string r in Dependents[s])
@@ -167,10 +185,13 @@ namespace SpreadsheetUtilities
             foreach (string t in newDependents)
                 AddDependency(s, t);
         }
+
         /// <summary>
-        /// Removes all existing ordered pairs of the form (r,s).  Then, for each 
-        /// t in newDependees, adds the ordered pair (t,s).
+        /// Removes all existing ordered pairs of the form (s,r).  Then, for each
+        /// t in newDependees, adds the ordered pair (s,t).
         /// </summary>
+        ///<param name="s">the dependent key to have all dependents removed</param>
+        /// <param name="newDependees">an IEnumerable object that contains the new dependees</param>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
             foreach (string r in Dependees[s])
@@ -188,7 +209,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="s">a string dependent</param>
         /// <param name="t"> a string dependee</param>
-        /// <returns></returns>
+        /// <returns>true if the pair exists, false otherwise</returns>
         private bool HasPair(string s, string t)
         {
             if(!Dependents.ContainsKey(s))
