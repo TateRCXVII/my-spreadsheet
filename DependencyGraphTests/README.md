@@ -11,18 +11,10 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 ```
 
 # Comments to Evaluators:
-The work in this assignment stands on its own. There are many instances where exceptions are handled possibly redundantly. I chose this
-tactic in order to provide the user and myself with more case-by-case error codes. However, this could be a possible improvement in the future
+The work in this test suite stands on its own. Code coverage is 100% across all lines and branches.
 
 # Assignment Specific Topics
-With the algorithm being provided, walking through the coding analysis and implementation phase was fairly simple. The tough part was
-figuring out what to test for and how. There were a few exceptions provided in the assignment description, however for the most part it was
-up to us to understand the algorithm and what would be valid and what would not.
-
-This Class makes use of extensions for the Stack to help with overall efficiency and readability. In the future, I can definitely add more 
-extensions to increase my code readability. I need to take more time to plan out my code.
-
-I learned a lot about C#, delegates, exception handling, and overall algorithm design from this assignment.
+TODO COMPLETE
 
 
 

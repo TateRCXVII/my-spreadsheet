@@ -222,5 +222,120 @@ namespace DevelopmentTests
         HashSet<string>(t.GetDependees(letters[i]))));
             }
         }
+
+        [TestMethod()]
+        public void HasDependentsSimpleTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+
+            Assert.IsTrue(t.HasDependents("a"));
+        }
+
+        [TestMethod()]
+        public void HasDependentsFalseAfterRemoveTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+            t.RemoveDependency("a", "b");
+            t.RemoveDependency("a", "c");
+
+            Assert.IsFalse(t.HasDependents("a"));
+        }
+
+        [TestMethod()]
+        public void HasDependentsNonexistentKey()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+
+            Assert.IsFalse(t.HasDependents("z"));
+        }
+
+        [TestMethod()]
+        public void HasDependeesSimpleTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+
+            Assert.IsTrue(t.HasDependees("b"));
+        }
+
+        [TestMethod()]
+        public void HasDependeesFalseAfterRemoveTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+            t.RemoveDependency("a", "b");
+            t.RemoveDependency("a", "c");
+
+            Assert.IsFalse(t.HasDependees("c"));
+        }
+
+        [TestMethod()]
+        public void HasDependeesNonexistentKey()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+
+            Assert.IsFalse(t.HasDependees("z"));
+        }
+
+        [TestMethod()]
+        public void TestDependeesSize()
+        {
+            // Dependency graph
+            DependencyGraph t = new DependencyGraph();
+            // A bunch of strings to use
+            const int SIZE = 200;
+            string[] letters = new string[SIZE];
+
+            for (int i = 0; i < SIZE; i++)
+                letters[i] = ("" + (char)('a' + i));
+
+            // Add a bunch of dependencies
+            for (int i = 0; i < SIZE; i++)
+                for (int j = i + 1; j < SIZE; j++)
+                    t.AddDependency(letters[j], letters[i]);
+
+            Assert.AreEqual(SIZE-1, t["a"]);
+            Assert.AreEqual(SIZE - 2, t["b"]);
+            Assert.AreEqual(SIZE - 3, t["c"]);
+            Assert.AreEqual(SIZE - 4, t["d"]);
+
+        }
+
+        //indirectly testing haspair helper method branch
+        [TestMethod()]
+        public void RemoveDependencyFalseNoKey()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+            t.RemoveDependency("a", "b");
+            t.RemoveDependency("n", "c");
+
+            Assert.AreEqual(3, t.Size);
+        }
     }
 }
