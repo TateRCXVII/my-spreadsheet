@@ -14,13 +14,14 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 The work in this assignment stands on its own. There are many instances where exceptions are handled possibly redundantly. I chose this
 tactic in order to provide the user and myself with more case-by-case error codes. However, this could be a possible improvement in the future
 
-# Time Estimate Breakdown
-- 3 hrs analyzing and understanding the problem
-- 2 hrs of production and development
-- 2 hrs of test creation (before and after production)
-- 3 hrs of debugging and improvement
-
-- 10 hrs total
+# Time Estimate vs. Actual Breakdown
+|        | Expected | Actual | Notes                                                                                                                    |
+|--------|----------|--------|--------------------------------------------------------------------------------------------------------------------------|
+|        | 3        | 2      | Once I grasped the task and data structure, analysis was fairly simple.                                              |
+|        | 2        | 1      | Because I understood the task, implementing the graph was also simple and used mainly default methods.                |
+|        | 2        | 2      | Adding tests is a key component to having correct code.                                                                  |
+|        | 3        | 1      | As I added tests, more bugs were apparent, but didn't do as much debugging as I expected off the bat.                 |
+| Total: | 10       | 6      | Overall, took less time than I had estimated, which allowed me to think of more tests and improve my Evaluator class. |
 
 # Assignment Specific Topics
 With the algorithm being provided, walking through the coding analysis and implementation phase was fairly simple. The tough part was
@@ -32,12 +33,10 @@ extensions to increase my code readability. I need to take more time to plan out
 
 I learned a lot about C#, delegates, exception handling, and overall algorithm design from this assignment.
 
-
-
 # Consulted Peers:
-Thatcher Geary
-Sanjay Gounder
-Shad
+-Thatcher Geary
+- Sanjay Gounder
+- Shad
 
 # References:
 
