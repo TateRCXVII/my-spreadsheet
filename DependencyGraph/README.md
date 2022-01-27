@@ -42,7 +42,5 @@ Shad
 # References:
 
     1. C# Access Dictionary With Key - https://stackoverflow.com/questions/12169443/get-dictionary-value-by-key
-    2. C# Delegates Explained (YouTube) - https://www.youtube.com/watch?v=ifbYA8hyvjc
-    3. C# Generics - https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
-    4. C# Extensions - https://www.tutorialsteacher.com/csharp/csharp-extension-method
-    5. Trimming strings - https://kodify.net/csharp/strings/remove-whitespace/
+    2. Data at the root level is invalid error - https://community.dynamics.com/crm/f/microsoft-dynamics-crm-forum/269015/data-at-the-root-level-is-invalid-line-1-position-1
+    3. Code Coverage Principles - https://en.wikipedia.org/wiki/Code_coverage
