@@ -223,6 +223,9 @@ namespace DevelopmentTests
             }
         }
 
+        /// <summary>
+        /// Test that HasDependents works after adding dependencies
+        /// </summary>
         [TestMethod()]
         public void HasDependentsSimpleTest()
         {
@@ -235,6 +238,9 @@ namespace DevelopmentTests
             Assert.IsTrue(t.HasDependents("a"));
         }
 
+        /// <summary>
+        /// Tests that Remove dependency works on has dependents
+        /// </summary>
         [TestMethod()]
         public void HasDependentsFalseAfterRemoveTest()
         {
@@ -249,6 +255,9 @@ namespace DevelopmentTests
             Assert.IsFalse(t.HasDependents("a"));
         }
 
+        /// <summary>
+        /// Tests HasDependents with nonexistent key
+        /// </summary>
         [TestMethod()]
         public void HasDependentsNonexistentKey()
         {
@@ -261,6 +270,9 @@ namespace DevelopmentTests
             Assert.IsFalse(t.HasDependents("z"));
         }
 
+        /// <summary>
+        /// Checks can add to dependees
+        /// </summary>
         [TestMethod()]
         public void HasDependeesSimpleTest()
         {
@@ -273,6 +285,9 @@ namespace DevelopmentTests
             Assert.IsTrue(t.HasDependees("b"));
         }
 
+        /// <summary>
+        /// Test that remove dependency removes a dependee
+        /// </summary>
         [TestMethod()]
         public void HasDependeesFalseAfterRemoveTest()
         {
@@ -287,6 +302,9 @@ namespace DevelopmentTests
             Assert.IsFalse(t.HasDependees("c"));
         }
 
+        /// <summary>
+        /// Test if dependees doesn't throw exception with invalid key
+        /// </summary>
         [TestMethod()]
         public void HasDependeesNonexistentKey()
         {
@@ -299,6 +317,9 @@ namespace DevelopmentTests
             Assert.IsFalse(t.HasDependees("z"));
         }
 
+        /// <summary>
+        /// Test the size method for a large number of dependencies
+        /// </summary>
         [TestMethod()]
         public void TestDependeesSize()
         {
@@ -322,6 +343,9 @@ namespace DevelopmentTests
             Assert.AreEqual(0, t["asdf"]);
         }
 
+        /// <summary>
+        /// Tests that an invalid key returns 0
+        /// </summary>
         [TestMethod()]
         public void TestDependeesSizeNoKey()
         {
@@ -341,7 +365,9 @@ namespace DevelopmentTests
             Assert.AreEqual(0, t["asdf"]);
         }
 
-        //indirectly testing haspair helper method branch
+        /// <summary>
+        /// Tests that removing a dependency with an invalid key doesn't change dictionaries
+        /// </summary>
         [TestMethod()]
         public void RemoveDependencyFalseNoKey()
         {
@@ -356,6 +382,9 @@ namespace DevelopmentTests
             Assert.AreEqual(3, t.Size);
         }
 
+        /// <summary>
+        /// Tests that can't remove nonexistent dependency
+        /// </summary>
         [TestMethod()]
         public void RemoveDependencyAfterReplace()
         {
@@ -370,6 +399,9 @@ namespace DevelopmentTests
             Assert.AreEqual(3, t.Size);
         }
 
+        /// <summary>
+        /// Checks that replace with incorrect key doesn't change dictionaries
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependencyNoKey()
         {
@@ -384,6 +416,9 @@ namespace DevelopmentTests
             Assert.AreEqual(4, t.Size);
         }
 
+        /// <summary>
+        /// Checks that enumerate returns empty IEnumerable with invalid key
+        /// </summary>
         [TestMethod()]
         public void EnumerateNonexistentKey()
         {
