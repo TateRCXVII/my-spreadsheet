@@ -14,19 +14,7 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 The work in this test suite stands on its own. Code coverage is 100% across all lines and branches.
 
 # Assignment Specific Topics
-TODO COMPLETE
+As stated above, the tests cover 100% of the code. Not to say this code is correct, however, it is *somewhat* correct because of this fact.
+The majority of these tests were written by the 3500 staff. I added a few to cover added methods, branches, and cases.
 
 
-
-# Consulted Peers:
-- Sanjay Gounder
-- Collin
-- Thatcher Geary
-
-# References:
-
-    1. C# Regex Documentation - https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
-    2. C# Delegates Explained (YouTube) - https://www.youtube.com/watch?v=ifbYA8hyvjc
-    3. C# Generics - https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics
-    4. C# Extensions - https://www.tutorialsteacher.com/csharp/csharp-extension-method
-    5. Trimming strings - https://kodify.net/csharp/strings/remove-whitespace/
