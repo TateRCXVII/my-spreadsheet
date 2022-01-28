@@ -190,8 +190,9 @@ namespace SpreadsheetUtilities
         /// <param name="newDependents">an IEnumerable object that contains the new dependents</param>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            foreach (string r in Dependents[s])
-                RemoveDependency(s, r);
+            if(Dependents.ContainsKey(s))
+                foreach (string r in Dependents[s])
+                    RemoveDependency(s, r);
 
             foreach (string t in newDependents)
                 AddDependency(s, t);
@@ -205,8 +206,9 @@ namespace SpreadsheetUtilities
         /// <param name="newDependees">an IEnumerable object that contains the new dependees</param>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            foreach (string r in Dependees[s])
-                RemoveDependency(r, s);
+            if(Dependees.ContainsKey(s))
+                foreach (string r in Dependees[s])
+                    RemoveDependency(r, s);
 
             foreach (string t in newDependees)
                 AddDependency(t, s);
