@@ -115,6 +115,8 @@ namespace SpreadsheetUtilities
         /// <returns>The IEnumerable object which contains the dependents</returns>
         public IEnumerable<string> GetDependents(string s)
         {
+            if (!Dependents.ContainsKey(s))
+                return new List<string>();
             return Dependents[s];
         }
 
@@ -125,6 +127,8 @@ namespace SpreadsheetUtilities
         /// <returns>The IEnumerable object which contains the dependees</returns>
         public IEnumerable<string> GetDependees(string s)
         {
+            if(!Dependees.ContainsKey(s))
+                return new List<string>();
             return Dependees[s];
         }
 
@@ -140,13 +144,15 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            //these four branches are for the HasPair and ease of potential future dependencies
+            //being added to the dictionaries.
             if (!Dependents.ContainsKey(s))
                 Dependents.Add(s, new HashSet<string>());
 
             if (!Dependents.ContainsKey(t))
                 Dependents.Add(t, new HashSet<string>());
 
-            if(!Dependees.ContainsKey(s))
+            if (!Dependees.ContainsKey(s))
                 Dependees.Add(s, new HashSet<string>());
 
             if (!Dependees.ContainsKey(t))
@@ -200,12 +206,7 @@ namespace SpreadsheetUtilities
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
             foreach (string r in Dependees[s])
-            {
-                Dependents[r].Remove(s);
-                dependencyCount--;
-            }
-
-            Dependees[s].Clear();
+                RemoveDependency(r, s);
 
             foreach (string t in newDependees)
                 AddDependency(t, s);
