@@ -371,6 +371,20 @@ namespace DevelopmentTests
         }
 
         [TestMethod()]
+        public void ReplaceDependencyNoKey()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "c");
+            t.AddDependency("c", "b");
+            t.AddDependency("b", "d");
+            t.ReplaceDependents("z", new HashSet<string>());
+            t.ReplaceDependees("x", new HashSet<string>());
+
+            Assert.AreEqual(4, t.Size);
+        }
+
+        [TestMethod()]
         public void EnumerateNonexistentKey()
         {
             DependencyGraph t = new DependencyGraph();
