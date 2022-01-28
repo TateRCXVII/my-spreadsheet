@@ -369,5 +369,15 @@ namespace DevelopmentTests
 
             Assert.AreEqual(3, t.Size);
         }
+
+        [TestMethod()]
+        public void EnumerateNonexistentKey()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("x", "y");
+
+            Assert.IsFalse(t.GetDependees("b").GetEnumerator().MoveNext());
+            Assert.IsFalse(t.GetDependents("a").GetEnumerator().MoveNext());
+        }
     }
 }
