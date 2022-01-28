@@ -178,6 +178,10 @@ namespace SpreadsheetUtilities
                 Dependees[t].Remove(s);
                 Dependents[s].Remove(t);
                 dependencyCount--;
+                if(Dependents[s].Count == 0)
+                    Dependents.Remove(s);
+                if(Dependees[t].Count == 0)
+                    Dependees.Remove(t);
             }
 
         }
