@@ -4,15 +4,18 @@ Partner:    None
 Date:       23-Jan-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
-Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII/tree/master/FormulaEvaluator
+Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII/tree/master/Extensions
 Commit #:   a17336f1093fc630c328bd86909ac6a1101cd71b
 Project:    Extensions
 Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in Academic Coursework.
 ```
 
 # Comments to Evaluators:
-Extensions will be added as the Spreadsheet project continues.
-My next TODO is to add the stack extensions used in the formula evaluator to the overall extensions class.
+
+# Extensions:
+## Stack Extensions:
+- HasOnTop(): checks if there is an element present at the top of the stack
+- IsEmpty(): returns true if the stack is empty, false otherwise
 
 # Consulted Peers:
 
