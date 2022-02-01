@@ -18,7 +18,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyGraph", "DependencyGraph\DependencyGraph.csproj", "{3B8824A0-982F-4712-A3D0-E92E160379A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaEvaluatorTests", "FormulaEvaluatorTests\FormulaEvaluatorTests.csproj", "{82102D9E-6615-4007-8567-6FC23C215294}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaEvaluatorTests", "FormulaEvaluatorTests\FormulaEvaluatorTests.csproj", "{82102D9E-6615-4007-8567-6FC23C215294}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Formula", "Formula\Formula.csproj", "{B03ED78D-E829-4BC9-B472-CE13EDF80CF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormulaTests", "FormulaTests\FormulaTests.csproj", "{6FC30010-8177-4BD8-B253-04FB803DB4B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,6 +54,14 @@ Global
 		{82102D9E-6615-4007-8567-6FC23C215294}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82102D9E-6615-4007-8567-6FC23C215294}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82102D9E-6615-4007-8567-6FC23C215294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B03ED78D-E829-4BC9-B472-CE13EDF80CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B03ED78D-E829-4BC9-B472-CE13EDF80CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B03ED78D-E829-4BC9-B472-CE13EDF80CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B03ED78D-E829-4BC9-B472-CE13EDF80CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FC30010-8177-4BD8-B253-04FB803DB4B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FC30010-8177-4BD8-B253-04FB803DB4B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC30010-8177-4BD8-B253-04FB803DB4B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FC30010-8177-4BD8-B253-04FB803DB4B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
