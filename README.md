@@ -22,9 +22,10 @@ Future extensions are:
 # TODOS
 Improvements:
 - Move stack extensions to extension class
-- Correct Evaluate code
 
 # Time Expenditures:
 
     1. Assignment One:   Predicted Hours:          10        Actual Hours:     11       Notes: Found an error on Friday night and spent extra time fixing bugs.
     2. Assignment Two:   Predicted Hours:          10        Actual Hours:     6         Notes: Analysis took a lot of understanding the tests. After that, however, things were fairly simple.
+    3. Assignment Two:   Predicted Hours:          12        Actual Hours:              Notes: 
+
