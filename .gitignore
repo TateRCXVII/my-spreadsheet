@@ -367,3 +367,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /FormulaEvaluatorTests/FormulaEvaluatorTests.cs
 /FormulaEvaluatorTests/FormulaEvaluatorTests.csproj
+/PS2Tests
