@@ -173,7 +173,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            return false;
+            return f1.Equals(f2);
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator !=(Formula f1, Formula f2)
         {
-            return false;
+            return !f2.Equals(f2);
         }
 
         /// <summary>
@@ -193,7 +193,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override int GetHashCode()
         {
-            return 0;
+            //TODO: Confirm this is a good idea
+            return this.ToString().GetHashCode();
         }
 
         /// <summary>
