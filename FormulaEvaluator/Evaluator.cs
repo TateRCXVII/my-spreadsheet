@@ -52,7 +52,7 @@ namespace FormulaEvaluator
         Stack<string> Operator = new Stack<string>();
         Stack<int> Value = new Stack<int>();
 
-            if(expression == null) throw new ArgumentException("Null expression error.");
+            if(expression == null || expression == "") throw new ArgumentException("Null expression error.");
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             //iterate through the substrings and perform operations accordingly
             foreach (string token in substrings)
@@ -106,8 +106,8 @@ namespace FormulaEvaluator
                 throw new ArgumentException("Value stack has too many values .");
             else if (Operator.Count == 0)
                 return Value.Pop();
-            else if (Value.Count < 2)
-                throw new ArgumentException("Value stack doesn't have enough values.");
+            else if (Value.Count != 2)
+                throw new ArgumentException("Value stack doesn't have correct number of values.");
             else if (Operator.Count > 1)
                 throw new ArgumentException("Check for negative numbers.");
             else
@@ -195,6 +195,7 @@ namespace FormulaEvaluator
                 if (Value.Count < 2)
                     throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
                 Value.Push(AddOrSubtract(Value, Operator));
+
             }
 
             if (Operator.HasOnTop("("))
