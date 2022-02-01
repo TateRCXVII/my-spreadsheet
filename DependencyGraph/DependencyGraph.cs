@@ -77,7 +77,7 @@ namespace SpreadsheetUtilities
         { 
             get 
             {
-                if (!Dependents.ContainsKey(s))
+                if (!Dependees.ContainsKey(s))
                     return 0;
                 return Dependees[s].Count; 
             }
