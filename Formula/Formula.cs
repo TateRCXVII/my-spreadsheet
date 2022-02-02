@@ -45,6 +45,9 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class Formula
     {
+        //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
+        readonly static Regex VariableRegex = new("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
+
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
         /// described in the class comment.  If the expression is syntactically invalid,

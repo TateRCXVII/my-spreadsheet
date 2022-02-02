@@ -60,7 +60,6 @@ namespace FormulaEvaluator
             {
                 if (token.Equals(" ") || token.Equals("")) continue;
 
-                //TODO: resolve trim
                 string eqnPart = token.Trim();
 
                 int val = 0;
