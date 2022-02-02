@@ -14,7 +14,7 @@
         /// <param name="stack">stack to be checked</param>
         /// <param name="value">the value being checked</param>
         /// <returns> true if the value is on top, false otherwise</returns>
-        public static bool HasOnTop<T>(this Stack<T> stack, T value)
+        public static bool HasOnTop<T>(this Stack<T> stack, T value) where T : notnull
         {
             if (!stack.IsEmpty() && stack.Peek().Equals(value))
                 return true;
@@ -28,7 +28,7 @@
         /// <typeparam name="T">Type in the stack</typeparam>
         /// <param name="stack">Stack to be checked</param>
         /// <returns>true if stack is empty, false otherwise </returns>
-        public static bool IsEmpty<T>(this Stack<T> stack)
+        public static bool IsEmpty<T>(this Stack<T> stack) where T : notnull
         {
             return stack.Count == 0;
         }
