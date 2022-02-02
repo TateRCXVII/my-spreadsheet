@@ -6,6 +6,19 @@ namespace FormulaTests
     [TestClass]
     public class FormulaTests
     {
+        // ************************** TESTS ON CONSTRUCTOR ************************* //
+
+        /// <summary>
+        ///Simple constructor test with simple normalizer/validator
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Constructor")]
+        public void SimpleNormalizerTest()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => true);
+            Assert.AreEqual("40+30.5*100+(x1+y1)", notEmpty.ToString());
+        }
+
         // ************************** TESTS ON EQUALITY ************************* //
 
         /// <summary>
@@ -41,8 +54,8 @@ namespace FormulaTests
         [TestCategory("Equality")]
         public void NormalizedEqualityTest()
         {
-            Formula? form1 = new Formula("40+30.5*100/Xy1"); ;
-            Formula form2 = new Formula("40 + 30.5 * 100 / xY1");
+            Formula? form1 = new Formula("40+30.5*100/XY1", s => s.ToLower(), s => true); ;
+            Formula form2 = new Formula("40 + 30.5 * 100 / xy1");
             Assert.IsTrue(form1 == form2);
             Assert.IsTrue(form1.Equals(form2));
         }
