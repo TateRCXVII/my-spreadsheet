@@ -361,7 +361,9 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object? obj)
         {
-            return this.ToString().Equals(obj.ToString());
+            if (obj == null)
+                return false;
+            return this.ToString().Equals(obj?.ToString());
         }
 
         /// <summary>

@@ -30,21 +30,21 @@ namespace FormulaTests
         {
             Formula? empty = null;
             Formula notEmpty = new Formula("40+30.5*100");
-            Assert.IsFalse(empty == notEmpty);
-            Assert.IsFalse(empty.Equals(notEmpty));
+            Assert.IsFalse(notEmpty.Equals(empty));
         }
 
         /// <summary>
-        ///Null formula should equal other null formula
+        ///Null formula should equal other null formula (?)
         ///</summary>
+        //TODO: Figure out if this is a valid test case
         [TestMethod(), Timeout(2000)]
         [TestCategory("Equality")]
         public void NullEqualNullTest()
         {
             Formula? empty = null;
             Formula? notEmpty = null;
-            Assert.IsTrue(empty == notEmpty);
-            Assert.IsTrue(empty.Equals(notEmpty));
+            bool hello = notEmpty?.Equals(empty);
+            Assert.IsTrue(notEmpty?.Equals(empty));
         }
 
         /// <summary>
