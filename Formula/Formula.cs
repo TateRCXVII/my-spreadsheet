@@ -315,7 +315,14 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<String> GetVariables()
         {
-            return null;
+            Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+            List<string> variables = new List<string>();
+            foreach (string token in GetTokens(formula))
+            {
+                if (varPattern.IsMatch(token))
+                    variables.Append(token);
+            }
+            return variables;
         }
 
         /// <summary>
