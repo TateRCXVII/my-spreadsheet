@@ -27,7 +27,7 @@ namespace FormulaEvaluator
     public class Evaluator
     {
         //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
-        readonly static Regex VariableRegex = new ("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
+        readonly static Regex VariableRegex = new("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
 
 
         public delegate int Lookup(String variable_name);
@@ -50,10 +50,10 @@ namespace FormulaEvaluator
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
 
-        Stack<string> Operator = new Stack<string>();
-        Stack<int> Value = new Stack<int>();
+            Stack<string> Operator = new Stack<string>();
+            Stack<int> Value = new Stack<int>();
 
-            if(expression == null || expression == "") throw new ArgumentException("Null expression error.");
+            if (expression == null || expression == "") throw new ArgumentException("Null expression error.");
             string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             //iterate through the substrings and perform operations accordingly
             foreach (string token in substrings)
@@ -74,7 +74,7 @@ namespace FormulaEvaluator
                     IntegerOrVariable(variableEvaluator(eqnPart), Operator, Value);
                 else
                 {
-                    switch(eqnPart)
+                    switch (eqnPart)
                     {
                         case "+":
                             AddOrSubtractOperator(eqnPart, Operator, Value);
@@ -154,7 +154,7 @@ namespace FormulaEvaluator
             return sum;
         }
 
- 
+
         /// <summary>
         /// A helper method to handle if an input is an integer or a variable.
         /// </summary>
@@ -166,7 +166,7 @@ namespace FormulaEvaluator
         /// </exception>
         private static void IntegerOrVariable(int val, Stack<string> Operator, Stack<int> Value)
         {
-           if(Operator.HasOnTop("*") || Operator.HasOnTop("/"))
+            if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
                 if (Value.IsEmpty())
                     throw new ArgumentException("No values to multiply or divide, invalid input.");
@@ -174,7 +174,7 @@ namespace FormulaEvaluator
                 Value.Push(val);
                 Value.Push(MultiplyOrDivide(Operator, Value));
             }
-           else
+            else
                 Value.Push(val);
         }
 
@@ -190,7 +190,7 @@ namespace FormulaEvaluator
         /// </exception>
         private static void RightParenthesis(Stack<string> Operator, Stack<int> Value)
         {
-            if(Operator.HasOnTop("+") || Operator.HasOnTop("-"))
+            if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
             {
                 if (Value.Count < 2)
                     throw new ArgumentException("Invalid input, can't perform addition or subtraction.");

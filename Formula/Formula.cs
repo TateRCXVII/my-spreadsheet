@@ -17,6 +17,7 @@
 //                to numeric tokens
 
 
+using Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,161 +111,344 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            return null;
-        }
-
-        /// <summary>
-        /// Enumerates the normalized versions of all of the variables that occur in this 
-        /// formula.  No normalization may appear more than once in the enumeration, even 
-        /// if it appears more than once in this Formula.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        /// 
-        /// new Formula("x+y*z", N, s => true).GetVariables() should enumerate "X", "Y", and "Z"
-        /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
-        /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
-        /// </summary>
-        public IEnumerable<String> GetVariables()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Returns a string containing no spaces which, if passed to the Formula
-        /// constructor, will produce a Formula f such that this.Equals(f).  All of the
-        /// variables in the string should be normalized.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        /// 
-        /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
-        /// new Formula("x + Y").ToString() should return "x+Y"
-        /// </summary>
-        public override string ToString()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// If obj is null or obj is not a Formula, returns false.  Otherwise, reports
-        /// whether or not this Formula and obj are equal.
-        /// 
-        /// Two Formulae are considered equal if they consist of the same tokens in the
-        /// same order.  To determine token equality, all tokens are compared as strings 
-        /// except for numeric tokens and variable tokens.
-        /// Numeric tokens are considered equal if they are equal after being "normalized" 
-        /// by C#'s standard conversion from string to double, then back to string. This 
-        /// eliminates any inconsistencies due to limited floating point precision.
-        /// Variable tokens are considered equal if their normalized forms are equal, as 
-        /// defined by the provided normalizer.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        ///  
-        /// new Formula("x1+y2", N, s => true).Equals(new Formula("X1  +  Y2")) is true
-        /// new Formula("x1+y2").Equals(new Formula("X1+Y2")) is false
-        /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
-        /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            return false;
-        }
-
-        /// <summary>
-        /// Reports whether f1 == f2, using the notion of equality from the Equals method.
-        /// Note that if both f1 and f2 are null, this method should return true.  If one is
-        /// null and one is not, this method should return false.
-        /// </summary>
-        public static bool operator ==(Formula f1, Formula f2)
-        {
-            return f1.Equals(f2);
-        }
-
-        /// <summary>
-        /// Reports whether f1 != f2, using the notion of equality from the Equals method.
-        /// Note that if both f1 and f2 are null, this method should return false.  If one is
-        /// null and one is not, this method should return true.
-        /// </summary>
-        public static bool operator !=(Formula f1, Formula f2)
-        {
-            return !f2.Equals(f2);
-        }
-
-        /// <summary>
-        /// Returns a hash code for this Formula.  If f1.Equals(f2), then it must be the
-        /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
-        /// randomly-generated unequal Formulae have the same hash code should be extremely small.
-        /// </summary>
-        public override int GetHashCode()
-        {
-            //TODO: Confirm this is a good idea
-            return this.ToString().GetHashCode();
-        }
-
-        /// <summary>
-        /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
-        /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
-        /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
-        /// match one of those patterns.  There are no empty tokens, and no token contains white space.
-        /// </summary>
-        private static IEnumerable<string> GetTokens(String formula)
-        {
-            // Patterns for individual tokens
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
-            String spacePattern = @"\s+";
-
-            // Overall pattern
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                            lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
-            // Enumerate matching tokens that don't consist solely of white space.
-            foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            Stack<string> Operator = new Stack<string>();
+            Stack<int> Value = new Stack<int>();
+            //TODO: Change to provided split func
+            string[] substrings = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+            //iterate through the substrings and perform operations accordingly
+            foreach (string token in substrings)
             {
-                if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+                if (token.Equals(" ") || token.Equals("")) continue;
+
+                string eqnPart = token.Trim();
+
+                int val = 0;
+                if (int.TryParse(eqnPart, out val))
                 {
-                    yield return s;
+                    if (val < 0)
+                        throw new ArgumentException("Negative numbers not allowed.");
+
+                    IntegerOrVariable(val, Operator, Value);
+                }
+                else if (VariableRegex.IsMatch(eqnPart))
+                    IntegerOrVariable(variableEvaluator(eqnPart), Operator, Value);
+                else
+                {
+                    switch (eqnPart)
+                    {
+                        case "+":
+                            AddOrSubtractOperator(eqnPart, Operator, Value);
+                            break;
+                        case "-":
+                            AddOrSubtractOperator(eqnPart, Operator, Value);
+                            break;
+                        case "*":
+                            Operator.Push(eqnPart);
+                            break;
+                        case "/":
+                            Operator.Push(eqnPart);
+                            break;
+                        case "(":
+                            Operator.Push(eqnPart);
+                            break;
+                        case ")":
+                            RightParenthesis(Operator, Value);
+                            break;
+
+                        default:
+                            throw new ArgumentException("Invalid expression input.");
+                    }
+
                 }
             }
 
+            if (Operator.Count == 0 && Value.Count > 1)
+                throw new ArgumentException("Value stack has too many values .");
+            else if (Operator.Count == 0)
+                return Value.Pop();
+            else if (Value.Count != 2)
+                throw new ArgumentException("Value stack doesn't have correct number of values.");
+            else if (Operator.Count > 1)
+                throw new ArgumentException("Check for negative numbers.");
+            else
+                return AddOrSubtract(Value, Operator);
+
+        }
+
+        /// <summary>
+        /// Helper method to handle when the + or - operators are encountered
+        /// </summary>
+        /// <param name="s">Current operator (either + or -)</param>
+        /// <param name="Operator">Stack of operators</param>
+        /// <param name="Value">Stack of values</param>
+        private static void AddOrSubtractOperator(String s, Stack<string> Operator, Stack<int> Value)
+        {
+            if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
+                Value.Push(AddOrSubtract(Value, Operator));
+
+            Operator.Push(s);
+        }
+
+        /// <summary>
+        /// A helper method to perform addition or subtraction from a value stack and operator stack
+        /// </summary>
+        /// <param name="Value">Stack of values</param>
+        /// <param name="Operator">Stack of operators</param>
+        /// <returns> the result of summing the top two values with + or - </returns>
+        /// <exception cref="ArgumentException">
+        /// If there aren't enough values on the value stack, an error is thrown.
+        /// </exception>
+        private static int AddOrSubtract(Stack<int> Value, Stack<string> Operator)
+        {
+            if (Value.Count < 2)
+                throw new ArgumentException("Can't perform operation: Not enough integers");
+
+            int right = Value.Pop();
+            int left = Value.Pop();
+            int sum = 0;
+            string op = Operator.Pop();
+            if (op.Equals("+"))
+                sum = left + right;
+            else
+                sum = left - right;
+            return sum;
+        }
+
+
+        /// <summary>
+        /// A helper method to handle if an input is an integer or a variable.
+        /// </summary>
+        /// <param name="val">The value being handled, which represents the right value in operations.</param>
+        /// <param name="Operator"> Stack of operators</param>
+        /// <param name="Value">Stack of values</param>
+        /// <exception cref="ArgumentException">
+        /// If there aren't values to perform operations on, an error is thrown.
+        /// </exception>
+        private static void IntegerOrVariable(int val, Stack<string> Operator, Stack<int> Value)
+        {
+            if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
+            {
+                if (Value.IsEmpty())
+                    throw new ArgumentException("No values to multiply or divide, invalid input.");
+
+                Value.Push(val);
+                Value.Push(MultiplyOrDivide(Operator, Value));
+            }
+            else
+                Value.Push(val);
+        }
+
+
+        /// <summary>
+        /// Helper method to handle the operations which accompany a ")"
+        /// </summary>
+        /// <param name="Operator">Operator stack</param>
+        /// <param name="Value">Value stack</param>
+        /// <exception cref="ArgumentException">
+        /// If there aren't enough values in the value stack or the input has invalid syntax,
+        /// an argument exception will be thrown.
+        /// </exception>
+        private static void RightParenthesis(Stack<string> Operator, Stack<int> Value)
+        {
+            if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
+            {
+                if (Value.Count < 2)
+                    throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
+                Value.Push(AddOrSubtract(Value, Operator));
+
+            }
+
+            if (Operator.HasOnTop("("))
+                Operator.Pop();
+            else
+                throw new ArgumentException("Expression wasn't opened with a parenthesis '('.");
+
+            if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
+                Value.Push(MultiplyOrDivide(Operator, Value));
+        }
+
+        /// <summary>
+        /// Helper method to handle multiplication and division and its accompanying errors.
+        /// </summary>
+        /// <param name="Operator">The Operator Stack</param>
+        /// <param name="Value">The Value Stack</param>
+        /// <returns>returns the result of the multiplication or division of two integers</returns>
+        /// <exception cref="ArgumentException">
+        /// If the value stack doesn't have enough integers or a division by 0 occurs, an error is thrown.
+        /// </exception>
+        private static int MultiplyOrDivide(Stack<string> Operator, Stack<int> Value)
+        {
+            if (Value.Count < 2)
+                throw new ArgumentException("Not enough integers to perform operation. Check for negative numbers.");
+
+            int right = Value.Pop();
+            int left = Value.Pop();
+            String op = Operator.Pop();
+            if (op.Equals("*"))
+                return left * right;
+            else
+            {
+                if (right == 0)
+                {
+                    throw new ArgumentException("Divide by zero error.");
+                }
+                return left / right;
+            }
         }
     }
 
     /// <summary>
-    /// Used to report syntactic errors in the argument to the Formula constructor.
+    /// Enumerates the normalized versions of all of the variables that occur in this 
+    /// formula.  No normalization may appear more than once in the enumeration, even 
+    /// if it appears more than once in this Formula.
+    /// 
+    /// For example, if N is a method that converts all the letters in a string to upper case:
+    /// 
+    /// new Formula("x+y*z", N, s => true).GetVariables() should enumerate "X", "Y", and "Z"
+    /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
+    /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
     /// </summary>
-    public class FormulaFormatException : Exception
+    public IEnumerable<String> GetVariables()
     {
-        /// <summary>
-        /// Constructs a FormulaFormatException containing the explanatory message.
-        /// </summary>
-        public FormulaFormatException(String message)
-            : base(message)
-        {
-        }
+        return null;
     }
 
     /// <summary>
-    /// Used as a possible return value of the Formula.Evaluate method.
+    /// Returns a string containing no spaces which, if passed to the Formula
+    /// constructor, will produce a Formula f such that this.Equals(f).  All of the
+    /// variables in the string should be normalized.
+    /// 
+    /// For example, if N is a method that converts all the letters in a string to upper case:
+    /// 
+    /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
+    /// new Formula("x + Y").ToString() should return "x+Y"
     /// </summary>
-    public struct FormulaError
+    public override string ToString()
     {
-        /// <summary>
-        /// Constructs a FormulaError containing the explanatory reason.
-        /// </summary>
-        /// <param name="reason"></param>
-        public FormulaError(String reason)
-            : this()
+        return null;
+    }
+
+    /// <summary>
+    /// If obj is null or obj is not a Formula, returns false.  Otherwise, reports
+    /// whether or not this Formula and obj are equal.
+    /// 
+    /// Two Formulae are considered equal if they consist of the same tokens in the
+    /// same order.  To determine token equality, all tokens are compared as strings 
+    /// except for numeric tokens and variable tokens.
+    /// Numeric tokens are considered equal if they are equal after being "normalized" 
+    /// by C#'s standard conversion from string to double, then back to string. This 
+    /// eliminates any inconsistencies due to limited floating point precision.
+    /// Variable tokens are considered equal if their normalized forms are equal, as 
+    /// defined by the provided normalizer.
+    /// 
+    /// For example, if N is a method that converts all the letters in a string to upper case:
+    ///  
+    /// new Formula("x1+y2", N, s => true).Equals(new Formula("X1  +  Y2")) is true
+    /// new Formula("x1+y2").Equals(new Formula("X1+Y2")) is false
+    /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
+    /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
+    /// </summary>
+    public override bool Equals(object obj)
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// Reports whether f1 == f2, using the notion of equality from the Equals method.
+    /// Note that if both f1 and f2 are null, this method should return true.  If one is
+    /// null and one is not, this method should return false.
+    /// </summary>
+    public static bool operator ==(Formula f1, Formula f2)
+    {
+        return f1.Equals(f2);
+    }
+
+    /// <summary>
+    /// Reports whether f1 != f2, using the notion of equality from the Equals method.
+    /// Note that if both f1 and f2 are null, this method should return false.  If one is
+    /// null and one is not, this method should return true.
+    /// </summary>
+    public static bool operator !=(Formula f1, Formula f2)
+    {
+        return !f2.Equals(f2);
+    }
+
+    /// <summary>
+    /// Returns a hash code for this Formula.  If f1.Equals(f2), then it must be the
+    /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
+    /// randomly-generated unequal Formulae have the same hash code should be extremely small.
+    /// </summary>
+    public override int GetHashCode()
+    {
+        //TODO: Confirm this is a good idea
+        return this.ToString().GetHashCode();
+    }
+
+    /// <summary>
+    /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
+    /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
+    /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
+    /// match one of those patterns.  There are no empty tokens, and no token contains white space.
+    /// </summary>
+    private static IEnumerable<string> GetTokens(String formula)
+    {
+        // Patterns for individual tokens
+        String lpPattern = @"\(";
+        String rpPattern = @"\)";
+        String opPattern = @"[\+\-*/]";
+        String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+        String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
+        String spacePattern = @"\s+";
+
+        // Overall pattern
+        String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+                                        lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
+
+        // Enumerate matching tokens that don't consist solely of white space.
+        foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
         {
-            Reason = reason;
+            if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+            {
+                yield return s;
+            }
         }
 
-        /// <summary>
-        ///  The reason why this FormulaError was created.
-        /// </summary>
-        public string Reason { get; private set; }
     }
+}
+
+/// <summary>
+/// Used to report syntactic errors in the argument to the Formula constructor.
+/// </summary>
+public class FormulaFormatException : Exception
+{
+    /// <summary>
+    /// Constructs a FormulaFormatException containing the explanatory message.
+    /// </summary>
+    public FormulaFormatException(String message)
+        : base(message)
+    {
+    }
+}
+
+/// <summary>
+/// Used as a possible return value of the Formula.Evaluate method.
+/// </summary>
+public struct FormulaError
+{
+    /// <summary>
+    /// Constructs a FormulaError containing the explanatory reason.
+    /// </summary>
+    /// <param name="reason"></param>
+    public FormulaError(String reason)
+        : this()
+    {
+        Reason = reason;
+    }
+
+    /// <summary>
+    ///  The reason why this FormulaError was created.
+    /// </summary>
+    public string Reason { get; private set; }
+}
 }
 
