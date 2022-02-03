@@ -47,8 +47,10 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
-        readonly static Regex VariableRegex = new("[a-zA-Z]+[0-9]+", RegexOptions.IgnoreCase);
+        readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
         private string formula;
+        private Func<string, string> normalize;
+        private Func<string, bool> isValid;
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -62,6 +64,8 @@ namespace SpreadsheetUtilities
             this(formula, s => s, s => true)
         {
             this.formula = formula;
+            this.normalize = s => s;
+            this.isValid = s => true;
         }
 
         /// <summary>
@@ -89,7 +93,10 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             this.formula = normalize(formula);
-            bool validFormula = isValid(formula);
+            //TODO: Is this helpful?
+            //bool validFormula = isValid(formula);
+            this.normalize = normalize;
+            this.isValid = isValid;
         }
 
         /// <summary>
@@ -115,10 +122,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
+            if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
+
             Stack<string> Operator = new Stack<string>();
             Stack<double> Value = new Stack<double>();
 
-            //TODO: Change to provided split func
             IEnumerable<string> substrings = GetTokens(formula);
 
             //iterate through the substrings and perform operations accordingly
@@ -131,13 +139,11 @@ namespace SpreadsheetUtilities
                 double val = 0;
                 if (double.TryParse(eqnPart, out val))
                 {
-                    if (val < 0)
-                        throw new ArgumentException("Negative numbers not allowed.");
-
                     IntegerOrVariable(val, Operator, Value);
                 }
+                //if it's a variable
                 else if (VariableRegex.IsMatch(eqnPart))
-                    IntegerOrVariable(lookup(eqnPart), Operator, Value);
+                    IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
                 else
                 {
                     switch (eqnPart)
@@ -162,20 +168,21 @@ namespace SpreadsheetUtilities
                             break;
 
                         default:
-                            throw new ArgumentException("Invalid expression input.");
+                            return new FormulaError("Invalid expression input. Check for typos or make sure +,-,/,* are the only operators.");
+                            //throw new ArgumentException("Invalid expression input.");
                     }
 
                 }
             }
 
             if (Operator.Count == 0 && Value.Count > 1)
-                throw new ArgumentException("Value stack has too many values .");
+                return new FormulaError("Invalid expression input. More values than there are operators.");
             else if (Operator.Count == 0)
                 return Value.Pop();
             else if (Value.Count != 2)
-                throw new ArgumentException("Value stack doesn't have correct number of values.");
+                return new FormulaError("Invalid expression input. More values than there are operators.");
             else if (Operator.Count > 1)
-                throw new ArgumentException("Check for negative numbers.");
+                return new FormulaError("Invalid expression input. More operators than there are values.");
             else
                 return AddOrSubtract(Value, Operator);
 
@@ -190,7 +197,12 @@ namespace SpreadsheetUtilities
         private static void AddOrSubtractOperator(String s, Stack<string> Operator, Stack<double> Value)
         {
             if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
-                Value.Push(AddOrSubtract(Value, Operator));
+            {
+                object result = AddOrSubtract(Value, Operator);
+                if (result.GetType() == typeof(FormulaError))
+                    return;
+                Value.Push(Convert.ToDouble(result));
+            }
 
             Operator.Push(s);
         }
@@ -204,10 +216,10 @@ namespace SpreadsheetUtilities
         /// <exception cref="ArgumentException">
         /// If there aren't enough values on the value stack, an error is thrown.
         /// </exception>
-        private static double AddOrSubtract(Stack<double> Value, Stack<string> Operator)
+        private static object AddOrSubtract(Stack<double> Value, Stack<string> Operator)
         {
             if (Value.Count < 2)
-                throw new ArgumentException("Can't perform operation: Not enough integers");
+                return new FormulaError("Can't perform addition operation: Not enough integers.");
 
             double right = Value.Pop();
             double left = Value.Pop();
@@ -340,7 +352,11 @@ namespace SpreadsheetUtilities
             StringBuilder sb = new StringBuilder();
             foreach (string s in GetTokens(formula))
             {
-                sb.Append(s);
+                //for sci notation
+                if (Double.TryParse(s, out double d))
+                    sb.Append(d.ToString());
+                else
+                    sb.Append(s);
             }
             return sb.ToString();
 
@@ -368,6 +384,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object? obj)
         {
+            //TODO: Figure out why null isn't working
             if (obj == null)
                 return false;
             return this.ToString().Equals(obj?.ToString());

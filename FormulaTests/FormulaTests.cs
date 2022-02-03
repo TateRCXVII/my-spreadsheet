@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
+using System.Text.RegularExpressions;
 
 namespace FormulaTests
 {
@@ -13,11 +14,94 @@ namespace FormulaTests
         ///</summary>
         [TestMethod(), Timeout(2000)]
         [TestCategory("Constructor")]
-        public void SimpleNormalizerTest()
+        public void SimpleNormalizerToLowerTest()
         {
             Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => true);
             Assert.AreEqual("40+30.5*100+(x1+y1)", notEmpty.ToString());
         }
+
+        /// <summary>
+        ///Simple constructor test with normalizer to remove white space
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Constructor")]
+        public void SimpleNormalizerWhiteSpaceTest()
+        {
+            Formula notEmpty = new Formula("40 +30.5 *100 +(X1+ Y1)", s => Regex.Replace(s, @"\s+", ""), s => true);
+            Assert.AreEqual("40+30.5*100+(X1+Y1)", notEmpty.ToString());
+        }
+
+        /// <summary>
+        ///Simple constructor test with simple normalizer/validator
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Constructor")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InvalidFormulaConstructor()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => false);
+        }
+
+
+        // ************************** TESTS ON EVALUATION ************************* //
+
+        /// <summary>
+        ///Simple formula evaluation test
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void SimpleEvaluationTest()
+        {
+            Formula notEmpty = new Formula("40 +30.5 *100 +(X1+ Y1)", s => Regex.Replace(s, @"\s+", ""), s => true);
+            Assert.AreEqual("40+30.5*100+(X1+Y1)", notEmpty.ToString());
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestAddition()
+        {
+            Formula add = new Formula("5+3", s => s, s => true);
+            Assert.AreEqual(8, add.Evaluate(f => 0));
+        }
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestSubtraction()
+        {
+            Formula sub = new Formula("18-10", s => s, s => true);
+            Assert.AreEqual(8, sub.Evaluate(s => 0));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestMultiplication()
+        {
+            Formula mult = new Formula("2*4", s => s, s => true);
+            Assert.AreEqual(8, mult.Evaluate(s => 0));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("6")]
+        public void TestDivision()
+        {
+            Formula div = new Formula("16/2", s => s, s => true);
+            Assert.AreEqual(8, div.Evaluate(s => 0));
+        }
+
+        // ************************** TESTS ON ERRORS ************************* //
+
+
 
         // ************************** TESTS ON EQUALITY ************************* //
 
@@ -43,7 +127,7 @@ namespace FormulaTests
         {
             Formula? empty = null;
             Formula? notEmpty = null;
-            bool hello = notEmpty?.Equals(empty);
+            //bool hello = notEmpty?.Equals(empty);
             Assert.IsTrue(notEmpty?.Equals(empty));
         }
 
@@ -56,6 +140,20 @@ namespace FormulaTests
         {
             Formula? form1 = new Formula("40+30.5*100/XY1", s => s.ToLower(), s => true); ;
             Formula form2 = new Formula("40 + 30.5 * 100 / xy1");
+            Assert.IsTrue(form1 == form2);
+            Assert.IsTrue(form1.Equals(form2));
+        }
+
+
+        /// <summary>
+        ///Test sci notation
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Equality")]
+        public void SciNotationTest()
+        {
+            Formula? form1 = new Formula("40 + 3.05e1 * 100 / XY1", s => s, s => true); ;
+            Formula form2 = new Formula("40 + 30.5 * 100 / XY1");
             Assert.IsTrue(form1 == form2);
             Assert.IsTrue(form1.Equals(form2));
         }
