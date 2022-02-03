@@ -211,9 +211,14 @@ namespace SpreadsheetUtilities
                 else
                     return AddOrSubtract(Value, Operator);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return new FormulaError();
+                if (e is DivideByZeroException)
+                    return new FormulaError("Invalid formula: Divide by zero error.");
+                else if (e is ArgumentException)
+                    return new FormulaError("Invalid formula: Undefined variable.");
+                else
+                    return new FormulaError("Invalid formula.");
             }
 
         }
@@ -228,9 +233,8 @@ namespace SpreadsheetUtilities
         {
             if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
             {
-                object result = AddOrSubtract(Value, Operator);
-                if (result.GetType() == typeof(FormulaError))
-                    return;
+                double result = AddOrSubtract(Value, Operator);
+
                 Value.Push(Convert.ToDouble(result));
             }
 
@@ -246,11 +250,8 @@ namespace SpreadsheetUtilities
         /// <exception cref="ArgumentException">
         /// If there aren't enough values on the value stack, an error is thrown.
         /// </exception>
-        private static object AddOrSubtract(Stack<double> Value, Stack<string> Operator)
+        private static double AddOrSubtract(Stack<double> Value, Stack<string> Operator)
         {
-            if (Value.Count < 2)
-                return new FormulaError("Can't perform addition operation: Not enough integers.");
-
             double right = Value.Pop();
             double left = Value.Pop();
             double sum = 0;
@@ -276,9 +277,6 @@ namespace SpreadsheetUtilities
         {
             if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
-                if (Value.IsEmpty())
-                    throw new ArgumentException("No values to multiply or divide, invalid input.");
-
                 Value.Push(val);
                 Value.Push(MultiplyOrDivide(Operator, Value));
             }
@@ -300,16 +298,11 @@ namespace SpreadsheetUtilities
         {
             if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
             {
-                if (Value.Count < 2)
-                    throw new ArgumentException("Invalid input, can't perform addition or subtraction.");
                 Value.Push(AddOrSubtract(Value, Operator));
-
             }
 
             if (Operator.HasOnTop("("))
                 Operator.Pop();
-            else
-                throw new ArgumentException("Expression wasn't opened with a parenthesis '('.");
 
             if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
                 Value.Push(MultiplyOrDivide(Operator, Value));
