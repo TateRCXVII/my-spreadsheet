@@ -314,11 +314,26 @@ namespace SpreadsheetUtilities
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="formula"></param>
         private static void VerifyParsing(IEnumerable<string> formula)
         {
+            String lpPattern = @"\(";
+            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+
+            bool firstToken = true;
+
+            if (formula.Count() == 0)
+                throw new FormulaFormatException("Formula can't be empty.");
             foreach (string token in formula)
             {
+                if (firstToken)
+                {
 
+                    firstToken = false;
+                }
             }
         }
 
@@ -336,6 +351,7 @@ namespace SpreadsheetUtilities
         public IEnumerable<String> GetVariables()
         {
             Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+
             List<string> variables = new List<string>();
             foreach (string token in GetTokens(formula))
             {
@@ -360,7 +376,7 @@ namespace SpreadsheetUtilities
             StringBuilder sb = new StringBuilder();
             foreach (string s in GetTokens(formula))
             {
-                //for sci notation
+                //for sci notation and decimals
                 if (Double.TryParse(s, out double d))
                     sb.Append(d.ToString());
                 else
@@ -415,6 +431,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator !=(Formula f1, Formula f2)
         {
+            //or return f2.GetHashCode() != f1.GetHashCode()
             return !f2.Equals(f2);
         }
 
