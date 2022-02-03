@@ -47,10 +47,10 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
-        readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
-        private string formula;
-        private Func<string, string> normalize;
-        private Func<string, bool> isValid;
+        private readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        private readonly string formula;
+        private readonly Func<string, string> normalize;
+        private readonly Func<string, bool> isValid;
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -97,6 +97,9 @@ namespace SpreadsheetUtilities
             //bool validFormula = isValid(formula);
             this.normalize = normalize;
             this.isValid = isValid;
+
+            if (!isValid(formula))
+                throw new FormulaFormatException("The input formula doesn't match the validator function.");
         }
 
         /// <summary>
@@ -122,88 +125,96 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
+            //TODO: Delete if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
 
             bool intCanFollow = true;
             Stack<string> Operator = new Stack<string>();
             Stack<double> Value = new Stack<double>();
 
             IEnumerable<string> substrings = GetTokens(formula);
-
-            //iterate through the substrings and perform operations accordingly
-            foreach (string token in substrings)
+            try
             {
-                //if (token.Equals(" ") || token.Equals("")) continue; //TODO: REMOVE?
 
-                string eqnPart = token.Trim();
+                //iterate through the substrings and perform operations accordingly
+                foreach (string token in substrings)
+                {
+                    //if (token.Equals(" ") || token.Equals("")) continue; //TODO: REMOVE?
 
-                double val = 0;
-                if (double.TryParse(eqnPart, out val))
-                {
-                    if (intCanFollow)
+                    string eqnPart = token.Trim();
+
+                    double val = 0;
+                    if (double.TryParse(eqnPart, out val))
                     {
-                        IntegerOrVariable(val, Operator, Value);
-                        intCanFollow = false;
-                    }
-                    else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
-                }
-                //if it's a variable
-                else if (VariableRegex.IsMatch(eqnPart))
-                {
-                    if (intCanFollow)
-                    {
-                        IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
-                        intCanFollow = false;
-                    }
-                    else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
-                }
-                else
-                {
-                    switch (eqnPart)
-                    {
-                        case "+":
-                            AddOrSubtractOperator(eqnPart, Operator, Value);
-                            intCanFollow = true;
-                            break;
-                        case "-":
-                            AddOrSubtractOperator(eqnPart, Operator, Value);
-                            intCanFollow = true;
-                            break;
-                        case "*":
-                            Operator.Push(eqnPart);
-                            intCanFollow = true;
-                            break;
-                        case "/":
-                            Operator.Push(eqnPart);
-                            intCanFollow = true;
-                            break;
-                        case "(":
-                            Operator.Push(eqnPart);
-                            intCanFollow = true;
-                            break;
-                        case ")":
-                            RightParenthesis(Operator, Value);
+                        if (intCanFollow)
+                        {
+                            IntegerOrVariable(val, Operator, Value);
                             intCanFollow = false;
-                            break;
-
-                        default:
-                            return new FormulaError("Invalid expression input. Check for typos or make sure +,-,/,* are the only operators.");
-                            //throw new ArgumentException("Invalid expression input.");
+                        }
+                        //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                     }
+                    //if it's a variable
+                    else if (VariableRegex.IsMatch(eqnPart))
+                    {
+                        if (intCanFollow)
+                        {
+                            IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
+                            intCanFollow = false;
+                        }
+                        //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
+                    }
+                    else
+                    {
+                        switch (eqnPart)
+                        {
+                            case "+":
+                                AddOrSubtractOperator(eqnPart, Operator, Value);
+                                intCanFollow = true;
+                                break;
+                            case "-":
+                                AddOrSubtractOperator(eqnPart, Operator, Value);
+                                intCanFollow = true;
+                                break;
+                            case "*":
+                                Operator.Push(eqnPart);
+                                intCanFollow = true;
+                                break;
+                            case "/":
+                                Operator.Push(eqnPart);
+                                intCanFollow = true;
+                                break;
+                            case "(":
+                                Operator.Push(eqnPart);
+                                intCanFollow = true;
+                                break;
+                            case ")":
+                                RightParenthesis(Operator, Value);
+                                intCanFollow = false;
+                                break;
 
+                                //default:
+                                //    return new FormulaError("Invalid expression input. Check for typos or make sure +,-,/,* are the only operators.");
+                                //    //throw new ArgumentException("Invalid expression input.");
+                        }
+
+                    }
                 }
-            }
 
-            if (Operator.Count == 0 && Value.Count > 1)
-                return new FormulaError("Invalid expression input. More values than there are operators.");
-            else if (Operator.Count == 0)
-                return Value.Pop();
-            else if (Value.Count != 2)
-                return new FormulaError("Invalid expression input. More values than there are operators.");
-            else if (Operator.Count > 1)
-                return new FormulaError("Invalid expression input. More operators than there are values.");
-            else
-                return AddOrSubtract(Value, Operator);
+                //if (Operator.Count == 0 && Value.Count > 1)
+                //    return new FormulaError("Invalid expression input. More values than there are operators.");
+                /* else*/
+                if (Operator.Count == 0)
+                    return Value.Pop();
+                //else if (Value.Count != 2)
+                //    return new FormulaError("Invalid expression input. More values than there are operators.");
+                //else if (Operator.Count > 1)
+                //    return new FormulaError("Invalid expression input. More operators than there are values.");
+                else
+                    return AddOrSubtract(Value, Operator);
+            }
+            catch (Exception)
+            {
+                return new FormulaError();
+            }
 
         }
 
