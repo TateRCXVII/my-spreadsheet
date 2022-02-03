@@ -124,6 +124,7 @@ namespace SpreadsheetUtilities
         {
             if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
 
+            bool intCanFollow = true;
             Stack<string> Operator = new Stack<string>();
             Stack<double> Value = new Stack<double>();
 
@@ -139,32 +140,50 @@ namespace SpreadsheetUtilities
                 double val = 0;
                 if (double.TryParse(eqnPart, out val))
                 {
-                    IntegerOrVariable(val, Operator, Value);
+                    if (intCanFollow)
+                    {
+                        IntegerOrVariable(val, Operator, Value);
+                        intCanFollow = false;
+                    }
+                    else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                 }
                 //if it's a variable
                 else if (VariableRegex.IsMatch(eqnPart))
-                    IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
+                {
+                    if (intCanFollow)
+                    {
+                        IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
+                        intCanFollow = false;
+                    }
+                    else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
+                }
                 else
                 {
                     switch (eqnPart)
                     {
                         case "+":
                             AddOrSubtractOperator(eqnPart, Operator, Value);
+                            intCanFollow = true;
                             break;
                         case "-":
                             AddOrSubtractOperator(eqnPart, Operator, Value);
+                            intCanFollow = true;
                             break;
                         case "*":
                             Operator.Push(eqnPart);
+                            intCanFollow = true;
                             break;
                         case "/":
                             Operator.Push(eqnPart);
+                            intCanFollow = true;
                             break;
                         case "(":
                             Operator.Push(eqnPart);
+                            intCanFollow = true;
                             break;
                         case ")":
                             RightParenthesis(Operator, Value);
+                            intCanFollow = false;
                             break;
 
                         default:
