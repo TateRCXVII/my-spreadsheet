@@ -98,8 +98,12 @@ namespace SpreadsheetUtilities
             this.normalize = normalize;
             this.isValid = isValid;
 
+
+
             if (!isValid(formula))
+            {
                 throw new FormulaFormatException("The input formula doesn't match the validator function.");
+            }
         }
 
         /// <summary>
@@ -126,8 +130,6 @@ namespace SpreadsheetUtilities
         public object Evaluate(Func<string, double> lookup)
         {
             //TODO: Delete if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
-
-            bool intCanFollow = true;
             Stack<string> Operator = new Stack<string>();
             Stack<double> Value = new Stack<double>();
 
@@ -145,21 +147,13 @@ namespace SpreadsheetUtilities
                     double val = 0;
                     if (double.TryParse(eqnPart, out val))
                     {
-                        if (intCanFollow)
-                        {
-                            IntegerOrVariable(val, Operator, Value);
-                            intCanFollow = false;
-                        }
+                        IntegerOrVariable(val, Operator, Value);
                         //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                     }
                     //if it's a variable
                     else if (VariableRegex.IsMatch(eqnPart))
                     {
-                        if (intCanFollow)
-                        {
-                            IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
-                            intCanFollow = false;
-                        }
+                        IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
                         //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                     }
                     else
@@ -168,27 +162,21 @@ namespace SpreadsheetUtilities
                         {
                             case "+":
                                 AddOrSubtractOperator(eqnPart, Operator, Value);
-                                intCanFollow = true;
                                 break;
                             case "-":
                                 AddOrSubtractOperator(eqnPart, Operator, Value);
-                                intCanFollow = true;
                                 break;
                             case "*":
                                 Operator.Push(eqnPart);
-                                intCanFollow = true;
                                 break;
                             case "/":
                                 Operator.Push(eqnPart);
-                                intCanFollow = true;
                                 break;
                             case "(":
                                 Operator.Push(eqnPart);
-                                intCanFollow = true;
                                 break;
                             case ")":
                                 RightParenthesis(Operator, Value);
-                                intCanFollow = false;
                                 break;
 
                                 //default:
@@ -290,10 +278,6 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="Operator">Operator stack</param>
         /// <param name="Value">Value stack</param>
-        /// <exception cref="ArgumentException">
-        /// If there aren't enough values in the value stack or the input has invalid syntax,
-        /// an argument exception will be thrown.
-        /// </exception>
         private static void RightParenthesis(Stack<string> Operator, Stack<double> Value)
         {
             if (Operator.HasOnTop("+") || Operator.HasOnTop("-"))
@@ -319,9 +303,6 @@ namespace SpreadsheetUtilities
         /// </exception>
         private static double MultiplyOrDivide(Stack<string> Operator, Stack<double> Value)
         {
-            if (Value.Count < 2)
-                throw new ArgumentException("Not enough integers to perform operation. Check for negative numbers.");
-
             double right = Value.Pop();
             double left = Value.Pop();
             String op = Operator.Pop();
@@ -329,11 +310,15 @@ namespace SpreadsheetUtilities
                 return left * right;
             else
             {
-                if (right == 0)
-                {
-                    throw new ArgumentException("Divide by zero error.");
-                }
                 return left / right;
+            }
+        }
+
+        private static void VerifyParsing(IEnumerable<string> formula)
+        {
+            foreach (string token in formula)
+            {
+
             }
         }
 

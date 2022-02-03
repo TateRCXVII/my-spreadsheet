@@ -157,5 +157,22 @@ namespace FormulaTests
             Assert.IsTrue(form1 == form2);
             Assert.IsTrue(form1.Equals(form2));
         }
+
+
+
+        // ************************** TESTS ON HASHCODE ************************* //
+
+        /// <summary>
+        ///Same formulas should have same hashcode
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Equality")]
+        public void NormalizedHashCodeTest()
+        {
+            Formula? form1 = new Formula("40+30.5*100/XY1", s => s.ToLower(), s => true); ;
+            Formula form2 = new Formula("40 + 30.5 * 100 / xy1");
+            Assert.IsTrue(form1.GetHashCode() == form2.GetHashCode());
+            Assert.IsTrue(form1.GetHashCode().Equals(form2.GetHashCode()));
+        }
     }
 }
