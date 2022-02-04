@@ -57,6 +57,8 @@ namespace FormulaTests
             Formula add = new Formula("5+3", s => s, s => true);
             Assert.AreEqual(8.0, add.Evaluate(f => 0));
         }
+
+
         /// <summary>
         /// See name
         /// </summary>
@@ -90,6 +92,9 @@ namespace FormulaTests
             Assert.AreEqual(8.0, div.Evaluate(s => 0));
         }
 
+        /// <summary>
+        /// see name
+        /// </summary>
         [TestMethod(), Timeout(5000)]
         [TestCategory("Evaluation")]
         public void TestComplexMultiVar()
@@ -98,6 +103,31 @@ namespace FormulaTests
             Assert.AreEqual(5.142857142857142, form.Evaluate(s => (s == "x7") ? 1 : 4));
         }
 
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestOperatorAfterParens()
+        {
+            Formula form = new Formula("(1*1)-2/2", s => s, s => true);
+            Assert.AreEqual(0.0, form.Evaluate(s => 0));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("10")]
+        public void TestOrderOperations()
+        {
+            Formula form = new Formula("2+6*3");
+            Assert.AreEqual(20.0, form.Evaluate(s => 0));
+        }
+
+        /// <summary>
+        /// see name
+        /// </summary>
         [TestMethod(), Timeout(5000)]
         [TestCategory("Evaluation")]
         public void TestComplexNestedParensRight()
@@ -114,6 +144,28 @@ namespace FormulaTests
             Assert.AreEqual(12.0, form.Evaluate(s => 2));
         }
 
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestRepeatedVar()
+        {
+            Formula form = new Formula("a4-a4*a4/a4");
+            Assert.AreEqual(0.0, form.Evaluate(s => 3));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestComplexAndParentheses()
+        {
+            Formula form = new Formula("2+3*5+(3+4*8)*5+2");
+            Assert.AreEqual(194.0, form.Evaluate(s => 0));
+        }
+
         // ************************** TESTS ON ERRORS ************************* //
 
         /// <summary>
@@ -125,6 +177,17 @@ namespace FormulaTests
         public void EmptyFormulaTest()
         {
             Formula formula = new Formula("");
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestInvalidVariable()
+        {
+            Formula form = new Formula("1xx");
         }
 
         /// <summary>
@@ -315,20 +378,6 @@ namespace FormulaTests
             Formula? empty = null;
             Formula notEmpty = new Formula("40+30.5*100");
             Assert.IsFalse(notEmpty.Equals(empty));
-        }
-
-        /// <summary>
-        ///Null formula should equal other null formula (?)
-        ///</summary>
-        //TODO: Figure out if this is a valid test case
-        [TestMethod(), Timeout(2000)]
-        [TestCategory("Equality")]
-        public void NullEqualNullTest()
-        {
-            Formula? empty = null;
-            Formula? notEmpty = null;
-            //bool hello = notEmpty?.Equals(empty);
-            Assert.IsTrue(notEmpty?.Equals(empty));
         }
 
         /// <summary>
