@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace FormulaTests
 {
+    /// <summary>
+    /// Test suite for the formula class and it's accompanying methods.
+    /// </summary>
     [TestClass]
     public class FormulaTests
     {
