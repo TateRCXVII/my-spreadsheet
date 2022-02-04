@@ -137,7 +137,7 @@ namespace FormulaTests
         }
 
         /// <summary>
-        ///Empty formula should throw exception
+        ///Formula with invalid token
         ///</summary>
         [TestMethod(), Timeout(5000)]
         [TestCategory("Errors")]

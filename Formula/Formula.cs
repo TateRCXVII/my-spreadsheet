@@ -135,21 +135,20 @@ namespace SpreadsheetUtilities
                 //iterate through the substrings and perform operations accordingly
                 foreach (string token in substrings)
                 {
-                    //if (token.Equals(" ") || token.Equals("")) continue; //TODO: REMOVE?
-
-                    string eqnPart = token.Trim();
+                    string eqnPart = token;
 
                     double val = 0;
                     if (double.TryParse(eqnPart, out val))
                     {
                         IntegerOrVariable(val, Operator, Value);
-                        //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                     }
                     //if it's a variable
                     else if (VariableRegex.IsMatch(eqnPart))
                     {
+                        if (!isValid(eqnPart))
+                            return new FormulaError("The variable format is invalid.");
+
                         IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
-                        //TODO: DELETE else return new FormulaError("Only operators or ) can follow numbers, variables, or )");
                     }
                     else
                     {
@@ -325,16 +324,12 @@ namespace SpreadsheetUtilities
         /// 
         private static void VerifyParsing(IEnumerable<string> formula, Func<string, bool> isValid)
         {
+            String doublePattern1 = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
             Regex lpPattern = new Regex(@"\(");
             Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
-            Regex doublePattern = new Regex(@"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?");
+            Regex doublePattern = new Regex(doublePattern1);
             Regex rpPattern = new Regex(@"\)");
             Regex opPattern = new Regex(@"[\+\-*/]");
-
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                lpPattern, rpPattern, opPattern, varPattern, doublePattern);
-
-            Regex overallPattern = new Regex(pattern);
 
             int lp_count = 0;
             int rp_count = 0;
@@ -346,8 +341,10 @@ namespace SpreadsheetUtilities
                 throw new FormulaFormatException("Formula can't be empty.");
             foreach (string token in formula)
             {
+
                 //1
-                if (!overallPattern.IsMatch(token))
+                if (!Double.TryParse(token, out double d) && token != ")" && token != "("
+                    && !varPattern.IsMatch(token) && !opPattern.IsMatch(token))
                     throw new FormulaFormatException("Invalid token in the formula.");
                 //7
                 if (lp_prev)
@@ -388,7 +385,7 @@ namespace SpreadsheetUtilities
 
                 if (opPattern.IsMatch(token))
                     lp_prev = true;
-                if (doublePattern.IsMatch(token) || varPattern.IsMatch(token))
+                if (doublePattern.IsMatch(Double.TryParse(token, out double o).ToString()) || varPattern.IsMatch(token))
                     rp_prev = true;
 
                 if (varPattern.IsMatch(token) && !isValid(token))
