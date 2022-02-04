@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
+using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace FormulaTests
@@ -152,11 +154,12 @@ namespace FormulaTests
         ///</summary>
         [TestMethod(), Timeout(5000)]
         [TestCategory("Errors")]
-        [ExpectedException(typeof(FormulaFormatException))]
         public void LookupTurnsVarInvalid()
         {
             Formula formula = new Formula("x1 + y1 + 4");
-
+            FormulaError error = new FormulaError();
+            error = (FormulaError)formula.Evaluate(s => Convert.ToDouble("a"));
+            Assert.AreEqual("Invalid formula.", error.Reason);
         }
 
 
@@ -227,6 +230,18 @@ namespace FormulaTests
             Assert.IsTrue(form1.Equals(form2));
         }
 
+        /// <summary>
+        ///Test inequality operator
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Equality")]
+        public void NotEqualsTest()
+        {
+            Formula? form1 = new Formula("40 + 3.05e1 * 100 / XY1", s => s, s => true);
+            Formula form2 = new Formula("40.8 + 30.5 * 100 / XY1");
+            Assert.IsTrue(form1 != form2);
+        }
+
 
 
         // ************************** TESTS ON HASHCODE ************************* //
@@ -242,6 +257,45 @@ namespace FormulaTests
             Formula form2 = new Formula("40 + 30.5 * 100 / xy1");
             Assert.IsTrue(form1.GetHashCode() == form2.GetHashCode());
             Assert.IsTrue(form1.GetHashCode().Equals(form2.GetHashCode()));
+        }
+
+        // ************************** TESTS ON GETTOKENS ************************* //
+
+        /// <summary>
+        ///Formula with valid tokens should return all variables
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Get Tokens")]
+        public void GetVariablesSimpleNormalizerTest()
+        {
+            Formula form1 = new Formula("40+30.5*100/XY1+AB2+X3", s => s.ToLower(), s => true);
+            List<string> expectedVars = new List<string>();
+            expectedVars.Add("xy1");
+            expectedVars.Add("ab2");
+            expectedVars.Add("x3");
+            IEnumerable<string> list = form1.GetVariables();
+            foreach (string variable in form1.GetVariables())
+            {
+                Assert.IsTrue(expectedVars.Contains(variable));
+            }
+        }
+
+        /// <summary>
+        ///Formula with valid tokens but different cases should return all variables, but won't match
+        ///</summary>
+        [TestMethod(), Timeout(2000)]
+        [TestCategory("Get Tokens")]
+        public void GetVariablesDifferentCasesSimpleTest()
+        {
+            Formula form1 = new Formula("40+30.5*100/xy1+Ab2+x3", s => s, s => true);
+            List<string> expectedVars = new List<string>();
+            expectedVars.Add("XY1");
+            expectedVars.Add("AB2");
+            expectedVars.Add("X3");
+            foreach (string variable in form1.GetVariables())
+            {
+                Assert.IsTrue(expectedVars.Contains(variable));
+            }
         }
     }
 }

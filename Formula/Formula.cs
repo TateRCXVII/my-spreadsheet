@@ -67,7 +67,7 @@ namespace SpreadsheetUtilities
             this.normalize = s => s;
             this.isValid = s => true;
 
-            VerifyParsing(GetTokens(formula), isValid);
+            VerifyParsing(GetTokens(formula), normalize, isValid);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace SpreadsheetUtilities
             this.normalize = normalize;
             this.isValid = isValid;
 
-            VerifyParsing(GetTokens(formula), isValid);
+            VerifyParsing(GetTokens(formula), normalize, isValid);
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace SpreadsheetUtilities
                     //if it's a variable
                     else if (VariableRegex.IsMatch(eqnPart))
                     {
-                        if (!isValid(eqnPart))
+                        if (!isValid(normalize(eqnPart)))
                             return new FormulaError("The variable format is invalid.");
 
                         IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
@@ -322,7 +322,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         /// <param name="formula">Input formula</param>
         /// 
-        private static void VerifyParsing(IEnumerable<string> formula, Func<string, bool> isValid)
+        private static void VerifyParsing(IEnumerable<string> formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             String doublePattern1 = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
             Regex lpPattern = new Regex(@"\(");
@@ -385,10 +385,10 @@ namespace SpreadsheetUtilities
 
                 if (opPattern.IsMatch(token))
                     lp_prev = true;
-                if (doublePattern.IsMatch(Double.TryParse(token, out double o).ToString()) || varPattern.IsMatch(token))
+                if (Double.TryParse(token, out double o) || varPattern.IsMatch(token))
                     rp_prev = true;
 
-                if (varPattern.IsMatch(token) && !isValid(token))
+                if (varPattern.IsMatch(token) && !isValid(normalize(token)))
                 {
                     throw new FormulaFormatException("Variable not valid.");
                 }
@@ -416,7 +416,7 @@ namespace SpreadsheetUtilities
             List<string> variables = new List<string>();
             foreach (string token in GetTokens(formula))
             {
-                if (varPattern.IsMatch(token))
+                if (varPattern.IsMatch(token) && isValid(normalize(token)))
                     variables.Append(token);
             }
             return variables;
@@ -440,6 +440,8 @@ namespace SpreadsheetUtilities
                 //for sci notation and decimals
                 if (Double.TryParse(s, out double d))
                     sb.Append(d.ToString());
+                else if (VariableRegex.IsMatch(s) && isValid(normalize(s)))
+                    sb.Append(normalize(s));
                 else
                     sb.Append(s);
             }
@@ -492,8 +494,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator !=(Formula f1, Formula f2)
         {
-            //or return f2.GetHashCode() != f1.GetHashCode()
-            return !f2.Equals(f2);
+            return f2.GetHashCode() != f1.GetHashCode();
         }
 
         /// <summary>
