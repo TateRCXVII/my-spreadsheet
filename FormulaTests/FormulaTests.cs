@@ -174,6 +174,134 @@ namespace FormulaTests
             Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => false);
         }
 
+        /// <summary>
+        ///Normalizer sets var to lower case, validator checks if var is upper case
+        ///Shoule fail
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void ContradictingValidatorNormalizerTest()
+        {
+            Regex UpperVariableRegex = new("[A-Z]+[0-9]+");
+            Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => UpperVariableRegex.IsMatch(s));
+        }
+
+        /// <summary>
+        ///Imbalanced left parentheses
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void ImbalancedLParenTest()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+((X1+Y1)");
+        }
+
+        /// <summary>
+        ///Imbalanced right parentheses
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void ImbalancedRParenTest()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+((X1+Y1)))");
+        }
+
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void OperatorCantFollowLParen()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+((*X1+Y1))");
+        }
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void OperatorCantFollowOperator()
+        {
+            Formula notEmpty = new Formula("40++30.5*100+((X1+Y1))");
+        }
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void NumberCantFollowRParen()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+((X1+Y1))5");
+        }
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void EmptyParenTest()
+        {
+            Formula notEmpty = new Formula("()");
+        }
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        public void DivideByZeroError()
+        {
+            Formula notEmpty = new Formula("40/0");
+            FormulaError error = (FormulaError)notEmpty.Evaluate(s => 1);
+            Assert.AreEqual("Invalid formula: Divide by zero error.", error.Reason);
+        }
+
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        public void DivideByZeroErrorRParen()
+        {
+            Formula notEmpty = new Formula("((40/50)/0)");
+            FormulaError error = (FormulaError)notEmpty.Evaluate(s => 1);
+            Assert.AreEqual("Invalid formula: Divide by zero error.", error.Reason);
+        }
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void LastTokenOperator()
+        {
+            Formula notEmpty = new Formula("(40/0)*");
+        }
+
+        /// <summary>
+        ///See name
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        public void NonexistentVariableError()
+        {
+            Formula notEmpty = new Formula("(40/X2)");
+            FormulaError error = (FormulaError)notEmpty.Evaluate(s => throw new ArgumentException());
+            Assert.AreEqual("Invalid formula: Undefined variable.", error.Reason);
+        }
+
+
 
         // ************************** TESTS ON EQUALITY ************************* //
 

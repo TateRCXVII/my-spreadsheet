@@ -94,7 +94,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
-            this.formula = normalize(formula);
+            this.formula = formula;
             this.normalize = normalize;
             this.isValid = isValid;
 
@@ -122,6 +122,10 @@ namespace SpreadsheetUtilities
         ///
         /// This method should never throw an exception.
         /// </summary>
+        /// <returns>
+        /// A FormulaFormat Error if a divide by zero or invalid variable lookup
+        /// occurs, or returns the result of the operation.
+        /// </returns>
         public object Evaluate(Func<string, double> lookup)
         {
             //TODO: Delete if (!this.isValid(formula)) return new FormulaError("The input formula doesn't match validator standards. Check your validator against your formula");
@@ -145,9 +149,6 @@ namespace SpreadsheetUtilities
                     //if it's a variable
                     else if (VariableRegex.IsMatch(eqnPart))
                     {
-                        if (!isValid(normalize(eqnPart)))
-                            return new FormulaError("The variable format is invalid.");
-
                         IntegerOrVariable(lookup(normalize(eqnPart)), Operator, Value);
                     }
                     else
@@ -172,24 +173,12 @@ namespace SpreadsheetUtilities
                             case ")":
                                 RightParenthesis(Operator, Value);
                                 break;
-
-                                //default:
-                                //    return new FormulaError("Invalid expression input. Check for typos or make sure +,-,/,* are the only operators.");
-                                //    //throw new ArgumentException("Invalid expression input.");
                         }
 
                     }
                 }
-
-                //if (Operator.Count == 0 && Value.Count > 1)
-                //    return new FormulaError("Invalid expression input. More values than there are operators.");
-                /* else*/
                 if (Operator.Count == 0)
                     return Value.Pop();
-                //else if (Value.Count != 2)
-                //    return new FormulaError("Invalid expression input. More values than there are operators.");
-                //else if (Operator.Count > 1)
-                //    return new FormulaError("Invalid expression input. More operators than there are values.");
                 else
                     return AddOrSubtract(Value, Operator);
             }
@@ -229,9 +218,6 @@ namespace SpreadsheetUtilities
         /// <param name="Value">Stack of values</param>
         /// <param name="Operator">Stack of operators</param>
         /// <returns> the result of summing the top two values with + or - </returns>
-        /// <exception cref="ArgumentException">
-        /// If there aren't enough values on the value stack, an error is thrown.
-        /// </exception>
         private static double AddOrSubtract(Stack<double> Value, Stack<string> Operator)
         {
             double right = Value.Pop();
@@ -252,15 +238,18 @@ namespace SpreadsheetUtilities
         /// <param name="val">The value being handled, which represents the right value in operations.</param>
         /// <param name="Operator"> Stack of operators</param>
         /// <param name="Value">Stack of values</param>
-        /// <exception cref="ArgumentException">
-        /// If there aren't values to perform operations on, an error is thrown.
+        /// <exception cref="DivideByZeroException">
+        /// Helper method throws divide by zero exception.
         /// </exception>
         private static void IntegerOrVariable(double val, Stack<string> Operator, Stack<double> Value)
         {
             if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
             {
                 Value.Push(val);
-                Value.Push(MultiplyOrDivide(Operator, Value));
+                double result = MultiplyOrDivide(Operator, Value);
+                if (result == double.PositiveInfinity)
+                    throw new DivideByZeroException();
+                Value.Push(result);
             }
             else
                 Value.Push(val);
@@ -283,7 +272,13 @@ namespace SpreadsheetUtilities
                 Operator.Pop();
 
             if (Operator.HasOnTop("*") || Operator.HasOnTop("/"))
-                Value.Push(MultiplyOrDivide(Operator, Value));
+            {
+                double result = MultiplyOrDivide(Operator, Value);
+                if (result == double.PositiveInfinity)
+                    throw new DivideByZeroException();
+
+                Value.Push(result);
+            }
         }
 
         /// <summary>
@@ -292,9 +287,6 @@ namespace SpreadsheetUtilities
         /// <param name="Operator">The Operator Stack</param>
         /// <param name="Value">The Value Stack</param>
         /// <returns>returns the result of the multiplication or division of two integers</returns>
-        /// <exception cref="ArgumentException">
-        /// If the value stack doesn't have enough integers or a division by 0 occurs, an error is thrown.
-        /// </exception>
         private static double MultiplyOrDivide(Stack<string> Operator, Stack<double> Value)
         {
             double right = Value.Pop();
@@ -409,6 +401,7 @@ namespace SpreadsheetUtilities
         /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
         /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
         /// </summary>
+        /// <returns>An IEnumberable of all the variables</returns>
         public IEnumerable<String> GetVariables()
         {
             Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
@@ -432,6 +425,7 @@ namespace SpreadsheetUtilities
         /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
         /// new Formula("x + Y").ToString() should return "x+Y"
         /// </summary>
+        /// <returns>A string version of the formula</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -469,6 +463,7 @@ namespace SpreadsheetUtilities
         /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
         /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
         /// </summary>
+        /// <returns>True if equations are equal, false otherwise</returns>
         public override bool Equals(object? obj)
         {
             //TODO: Figure out why null isn't working
@@ -482,6 +477,7 @@ namespace SpreadsheetUtilities
         /// Note that if both f1 and f2 are null, this method should return true.  If one is
         /// null and one is not, this method should return false.
         /// </summary>
+        /// <returns>True if equations are equal, false otherwise</returns>
         public static bool operator ==(Formula f1, Formula f2)
         {
             return f1.Equals(f2);
@@ -492,6 +488,7 @@ namespace SpreadsheetUtilities
         /// Note that if both f1 and f2 are null, this method should return false.  If one is
         /// null and one is not, this method should return true.
         /// </summary>
+        /// <returns>True if equations are not equal, false otherwise</returns>
         public static bool operator !=(Formula f1, Formula f2)
         {
             return f2.GetHashCode() != f1.GetHashCode();
@@ -502,9 +499,9 @@ namespace SpreadsheetUtilities
         /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
         /// randomly-generated unequal Formulae have the same hash code should be extremely small.
         /// </summary>
+        /// <returns>The hashcode based on the toString value of the formula</returns>
         public override int GetHashCode()
         {
-            //TODO: Confirm this is a good idea
             return this.ToString().GetHashCode();
         }
 
@@ -514,6 +511,7 @@ namespace SpreadsheetUtilities
         /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
         /// match one of those patterns.  There are no empty tokens, and no token contains white space.
         /// </summary>
+        /// <returns>An IEnumberable of the formula</returns>
         private static IEnumerable<string> GetTokens(String formula)
         {
             // Patterns for individual tokens
