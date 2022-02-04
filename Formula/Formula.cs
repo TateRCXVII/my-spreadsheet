@@ -66,6 +66,8 @@ namespace SpreadsheetUtilities
             this.formula = formula;
             this.normalize = s => s;
             this.isValid = s => true;
+
+            VerifyParsing(GetTokens(formula), isValid);
         }
 
         /// <summary>
@@ -93,17 +95,10 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             this.formula = normalize(formula);
-            //TODO: Is this helpful?
-            //bool validFormula = isValid(formula);
             this.normalize = normalize;
             this.isValid = isValid;
 
-
-
-            if (!isValid(formula))
-            {
-                throw new FormulaFormatException("The input formula doesn't match the validator function.");
-            }
+            VerifyParsing(GetTokens(formula), isValid);
         }
 
         /// <summary>
@@ -315,26 +310,95 @@ namespace SpreadsheetUtilities
         }
 
         /// <summary>
-        /// 
+        /// Method which validates tokens against specific parsing rules pasted below
+        ///
+        ///Specific Token Rule - the only valid tokens are (, ), +, -, *, /, variables, and decimal real numbers (including scientific notation).
+        ///One Token Rule - There must be at least one token.
+        ///Right Parentheses Rule -  When reading tokens from left to right, at no point should the number of closing parentheses seen so far be greater than the number of opening parentheses seen so far.
+        ///Balanced Parentheses Rule - The total number of opening parentheses must equal the total number of closing parentheses.
+        ///Starting Token Rule - The first token of an expression must be a number, a variable, or an opening parenthesis.
+        ///Ending Token Rule - The last token of an expression must be a number, a variable, or a closing parenthesis.
+        ///Parenthesis/Operator Following Rule - Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
+        ///Extra Following Rule - Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
         /// </summary>
-        /// <param name="formula"></param>
-        private static void VerifyParsing(IEnumerable<string> formula)
+        /// <param name="formula">Input formula</param>
+        /// 
+        private static void VerifyParsing(IEnumerable<string> formula, Func<string, bool> isValid)
         {
-            String lpPattern = @"\(";
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+            Regex lpPattern = new Regex(@"\(");
+            Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+            Regex doublePattern = new Regex(@"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?");
+            Regex rpPattern = new Regex(@"\)");
+            Regex opPattern = new Regex(@"[\+\-*/]");
 
-            bool firstToken = true;
+            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+                                lpPattern, rpPattern, opPattern, varPattern, doublePattern);
 
+            Regex overallPattern = new Regex(pattern);
+
+            int lp_count = 0;
+            int rp_count = 0;
+            bool rp_prev = false;
+            bool lp_prev = false;
+
+            //2.
             if (formula.Count() == 0)
                 throw new FormulaFormatException("Formula can't be empty.");
             foreach (string token in formula)
             {
-                if (firstToken)
+                //1
+                if (!overallPattern.IsMatch(token))
+                    throw new FormulaFormatException("Invalid token in the formula.");
+                //7
+                if (lp_prev)
                 {
+                    if (opPattern.IsMatch(token) || rpPattern.IsMatch(token))
+                        throw new FormulaFormatException("Operators or closing parentheses can't follow an opening parenthesis.");
+                    lp_prev = false;
+                }
 
-                    firstToken = false;
+                //8
+                if (rp_prev)
+                {
+                    if (!(opPattern.IsMatch(token) || rpPattern.IsMatch(token)))
+                        throw new FormulaFormatException("Only operators or closing parentheses can follow numbers, variables, or closing parentheses.");
+                    rp_prev = false;
+                }
+
+                //5 & 6
+                if (rpPattern.IsMatch(formula.First()) || opPattern.IsMatch(formula.First()))
+                    throw new FormulaFormatException("Formula can't begin with a close parenthesis or operator.");
+                if (lpPattern.IsMatch(formula.Last()) || opPattern.IsMatch(formula.Last()))
+                    throw new FormulaFormatException("Last token can't be an operator or (");
+
+                if (lpPattern.IsMatch(token))
+                {
+                    lp_count++;
+                    lp_prev = true;
+                }
+
+                if (rpPattern.IsMatch(token))
+                {
+                    rp_count++;
+                    rp_prev = true;
+                }
+                //3
+                if (rp_count > lp_count)
+                    throw new FormulaFormatException("More ) than ( in the formula.");
+
+                if (opPattern.IsMatch(token))
+                    lp_prev = true;
+                if (doublePattern.IsMatch(token) || varPattern.IsMatch(token))
+                    rp_prev = true;
+
+                if (varPattern.IsMatch(token) && !isValid(token))
+                {
+                    throw new FormulaFormatException("Variable not valid.");
                 }
             }
+            //4
+            if (rp_count != lp_count)
+                throw new FormulaFormatException("The number of ( doesn't match the number of ).");
         }
 
         /// <summary>
