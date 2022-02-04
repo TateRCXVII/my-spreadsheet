@@ -31,17 +31,6 @@ namespace FormulaTests
             Assert.AreEqual("40+30.5*100+(X1+Y1)", notEmpty.ToString());
         }
 
-        /// <summary>
-        ///Simple constructor test with simple normalizer/validator
-        ///</summary>
-        [TestMethod(), Timeout(2000)]
-        [TestCategory("Constructor")]
-        [ExpectedException(typeof(FormulaFormatException))]
-        public void InvalidFormulaConstructor()
-        {
-            Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => false);
-        }
-
 
         // ************************** TESTS ON EVALUATION ************************* //
 
@@ -64,7 +53,7 @@ namespace FormulaTests
         public void TestAddition()
         {
             Formula add = new Formula("5+3", s => s, s => true);
-            Assert.AreEqual(8, add.Evaluate(f => 0));
+            Assert.AreEqual(8.0, add.Evaluate(f => 0));
         }
         /// <summary>
         /// See name
@@ -74,7 +63,7 @@ namespace FormulaTests
         public void TestSubtraction()
         {
             Formula sub = new Formula("18-10", s => s, s => true);
-            Assert.AreEqual(8, sub.Evaluate(s => 0));
+            Assert.AreEqual(8.0, sub.Evaluate(s => 0));
         }
 
         /// <summary>
@@ -85,7 +74,7 @@ namespace FormulaTests
         public void TestMultiplication()
         {
             Formula mult = new Formula("2*4", s => s, s => true);
-            Assert.AreEqual(8, mult.Evaluate(s => 0));
+            Assert.AreEqual(8.0, mult.Evaluate(s => 0));
         }
 
         /// <summary>
@@ -96,11 +85,91 @@ namespace FormulaTests
         public void TestDivision()
         {
             Formula div = new Formula("16/2", s => s, s => true);
-            Assert.AreEqual(8, div.Evaluate(s => 0));
+            Assert.AreEqual(8.0, div.Evaluate(s => 0));
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestComplexMultiVar()
+        {
+            Formula form = new Formula("y1*3-8/2+4*(8-9*2)/14*x7", s => s, s => true);
+            Assert.AreEqual(5.142857142857142, form.Evaluate(s => (s == "x7") ? 1 : 4));
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestComplexNestedParensRight()
+        {
+            Formula form = new Formula("x1+(x2+(x3+(x4+(x5+x6))))", s => s, s => true);
+            Assert.AreEqual(6.0, form.Evaluate(s => 1));
+        }
+
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Evaluation")]
+        public void TestComplexNestedParensLeft()
+        {
+            Formula form = new Formula("((((x1+x2)+x3)+x4)+x5)+x6", s => s, s => true);
+            Assert.AreEqual(12.0, form.Evaluate(s => 2));
         }
 
         // ************************** TESTS ON ERRORS ************************* //
 
+        /// <summary>
+        ///Empty formula should throw exception
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void EmptyFormulaTest()
+        {
+            Formula formula = new Formula("");
+        }
+
+        /// <summary>
+        ///Formula can't be opened with )
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void OpenWithInRParenTest()
+        {
+            Formula formula = new Formula(")5+5");
+        }
+
+        /// <summary>
+        ///Empty formula should throw exception
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InvalidTokenTest()
+        {
+            Formula formula = new Formula("12^7");
+        }
+
+        /// <summary>
+        ///Empty formula should throw exception
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void LookupTurnsVarInvalid()
+        {
+            Formula formula = new Formula("x1 + y1 + 4");
+
+        }
+
+
+        /// <summary>
+        ///Simple constructor test with simple normalizer/validator
+        ///</summary>
+        [TestMethod(), Timeout(5000)]
+        [TestCategory("Errors")]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void InvalidFormulaConstructor()
+        {
+            Formula notEmpty = new Formula("40+30.5*100+(X1+Y1)", s => s.ToLower(), s => false);
+        }
 
 
         // ************************** TESTS ON EQUALITY ************************* //
