@@ -1,18 +1,22 @@
 ﻿using Spreadsheet;
 using SpreadsheetUtilities;
+using System.Text.RegularExpressions;
 
 namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private Dictionary<String, Cell> nonEmptyCells
+        private readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        private Dictionary<String, Cell> nonEmptyCells;
+        private DependencyGraph cellDependencies;
 
         /// <summary>
         /// Creates an empty spreadsheet
         /// </summary>
         public Spreadsheet()
         {
-
+            nonEmptyCells = new Dictionary<String, Cell>();
+            cellDependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -23,7 +27,10 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
-            throw new NotImplementedException();
+            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name))
+                throw new InvalidNameException();
+
+            return nonEmptyCells[name].Contents;
         }
 
         /// <summary>
@@ -33,7 +40,7 @@ namespace SS
         /// <returns>Names of Non Empty cells</returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            throw new NotImplementedException();
+            return nonEmptyCells.Keys;
         }
 
 
