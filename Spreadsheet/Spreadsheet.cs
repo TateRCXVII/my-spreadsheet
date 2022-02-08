@@ -1,9 +1,15 @@
-﻿using SpreadsheetUtilities;
+﻿using Spreadsheet;
+using SpreadsheetUtilities;
 
 namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
+        private Dictionary<String, Cell> nonEmptyCells
+
+        /// <summary>
+        /// Creates an empty spreadsheet
+        /// </summary>
         public Spreadsheet()
         {
 

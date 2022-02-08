@@ -9,6 +9,7 @@ namespace Spreadsheet
 {
     internal class Cell
     {
+        //Name of the cell
         private string _name;
 
         //String, double (including result from Formula.evaluate), or formula error
@@ -37,7 +38,7 @@ namespace Spreadsheet
         public Cell(string name, Formula formula)
         {
             _name = name;
-            _value = formula.Evaluate;
+            _value = formula.Evaluate(s => 0);
             _contents = formula;
         }
 
@@ -60,5 +61,25 @@ namespace Spreadsheet
             _value = text;
             _contents = text;
         }
+
+        #region Properties
+        public string Name
+        {
+            get { return _name; }
+        }
+
+        public object Value
+        {
+            get { return _value; }
+            set { _value = value; }
+        }
+
+        public object Contents
+        {
+            get { return _contents; }
+            set { _contents = value; }
+        }
+
+        #endregion
     }
 }
