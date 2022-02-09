@@ -64,6 +64,16 @@ namespace SpreadsheetTests
 
         [TestMethod]
         [Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void SetCellContentsNullFormulaTest()
+        {
+            SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
+            Formula? formula = null;
+            spreadsheet.SetCellContents("A1", formula);
+        }
+
+        [TestMethod]
+        [Timeout(5000)]
         public void SetCellContentsNumberTest()
         {
 

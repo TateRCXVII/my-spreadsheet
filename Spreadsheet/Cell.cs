@@ -12,10 +12,6 @@ namespace Spreadsheet
         //Name of the cell
         private string _name;
 
-        //String, double (including result from Formula.evaluate), or formula error
-        //displayed on screen without selection
-        private object _value;
-
         //String, double, or formula
         //empty string "" means empty cell
         //Displayed when the cell is selected (double clicked)
@@ -28,7 +24,6 @@ namespace Spreadsheet
         public Cell(string name)
         {
             _name = name;
-            _value = "";
             _contents = "";
         }
 
@@ -38,7 +33,6 @@ namespace Spreadsheet
         public Cell(string name, Formula formula)
         {
             _name = name;
-            _value = formula;
             _contents = formula;
         }
 
@@ -48,7 +42,6 @@ namespace Spreadsheet
         public Cell(string name, double number)
         {
             _name = name;
-            _value = number;
             _contents = number;
         }
 
@@ -58,7 +51,6 @@ namespace Spreadsheet
         public Cell(string name, string text)
         {
             _name = name;
-            _value = text;
             _contents = text;
         }
 
@@ -66,12 +58,6 @@ namespace Spreadsheet
         public string Name
         {
             get { return _name; }
-        }
-
-        public object Value
-        {
-            get { return _value; }
-            set { _value = value; }
         }
 
         public object Contents

@@ -27,7 +27,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
-            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name))
+            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name) || name is null)
                 throw new InvalidNameException();
 
             return nonEmptyCells[name].Contents;
@@ -58,19 +58,20 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override IList<string> SetCellContents(string name, double number)
         {
-            if (!VariableRegex.IsMatch(name) || name == "")
+            if (!VariableRegex.IsMatch(name) || name is null)
                 throw new InvalidNameException();
 
             if (nonEmptyCells.ContainsKey(name))
             {
                 nonEmptyCells[name].Contents = number;
+                cellDependencies.ReplaceDependees(name, new List<string>());
             }
             else
-            {
                 nonEmptyCells.Add(name, new Cell(name, number));
-            }
-            //TODO: Return recursive method
-            return cellDependencies.
+
+            IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
+            IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+            return ListDependents;
         }
 
         /// <summary>
@@ -88,7 +89,22 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override IList<string> SetCellContents(string name, string text)
         {
-            throw new NotImplementedException();
+            if (!VariableRegex.IsMatch(name) || name is null)
+                throw new InvalidNameException();
+            if (text is null)
+                throw new ArgumentNullException();
+
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                nonEmptyCells[name].Contents = text;
+                cellDependencies.ReplaceDependees(name, new List<string>());
+            }
+            else
+                nonEmptyCells.Add(name, new Cell(name, text));
+
+            IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
+            IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+            return ListDependents;
         }
 
         /// <summary>
@@ -124,6 +140,12 @@ namespace SS
             return cellDependencies.GetDependents(name);
         }
 
-        //TODO: Recursive method to return all direct and indirect dependencies of name
+        private void SetStringOrText(object name)
+        {
+            if (!(name is double) || !(name is string))
+                return;
+
+
+        }
     }
 }
