@@ -38,7 +38,7 @@ namespace Spreadsheet
         public Cell(string name, Formula formula)
         {
             _name = name;
-            _value = formula.Evaluate(s => 0);
+            _value = formula;
             _contents = formula;
         }
 

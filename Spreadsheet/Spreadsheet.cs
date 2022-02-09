@@ -58,7 +58,19 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override IList<string> SetCellContents(string name, double number)
         {
-            throw new NotImplementedException();
+            if (!VariableRegex.IsMatch(name) || name == "")
+                throw new InvalidNameException();
+
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                nonEmptyCells[name].Contents = number;
+            }
+            else
+            {
+                nonEmptyCells.Add(name, new Cell(name, number));
+            }
+            //TODO: Return recursive method
+            return cellDependencies.
         }
 
         /// <summary>
@@ -106,7 +118,12 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            throw new NotImplementedException();
+            if (!VariableRegex.IsMatch(name) || name == "")
+                throw new InvalidNameException();
+
+            return cellDependencies.GetDependents(name);
         }
+
+        //TODO: Recursive method to return all direct and indirect dependencies of name
     }
 }
