@@ -27,7 +27,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
-            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name) || name is null)
+            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name))
                 throw new InvalidNameException();
 
             return nonEmptyCells[name].Contents;
@@ -58,7 +58,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override IList<string> SetCellContents(string name, double number)
         {
-            if (!VariableRegex.IsMatch(name) || name is null)
+            if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
 
             if (nonEmptyCells.ContainsKey(name))
@@ -89,7 +89,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override IList<string> SetCellContents(string name, string text)
         {
-            if (!VariableRegex.IsMatch(name) || name is null)
+            if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (text is null)
                 throw new ArgumentNullException();
@@ -123,7 +123,7 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
-            if (!VariableRegex.IsMatch(name) || name is null)
+            if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (formula is null)
                 throw new ArgumentNullException();
@@ -164,11 +164,12 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (!VariableRegex.IsMatch(name) || name == "")
+            if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
 
             return cellDependencies.GetDependents(name);
         }
+
 
         private void SetStringOrText(object name)
         {

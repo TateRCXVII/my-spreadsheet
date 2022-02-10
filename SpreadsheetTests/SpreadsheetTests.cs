@@ -59,7 +59,9 @@ namespace SpreadsheetTests
         [Timeout(5000)]
         public void SetCellContentsStringTest()
         {
-
+            SS.Spreadsheet sheet = new SS.Spreadsheet();
+            sheet.SetCellContents("A1", "Apple");
+            Assert.AreEqual(sheet.GetCellContents("A1"), "Apple");
         }
 
         [TestMethod]
@@ -76,21 +78,9 @@ namespace SpreadsheetTests
         [Timeout(5000)]
         public void SetCellContentsNumberTest()
         {
-
-        }
-
-        [TestMethod]
-        [Timeout(5000)]
-        public void GetDirectDependentsTest()
-        {
-
-        }
-
-        [TestMethod]
-        [Timeout(5000)]
-        public void GetCellsToRecalculateTest()
-        {
-
+            SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
+            spreadsheet.SetCellContents("A1", 30);
+            Assert.AreEqual(30, spreadsheet.GetCellContents("A1"));
         }
     }
 }
