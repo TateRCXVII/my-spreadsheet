@@ -328,20 +328,7 @@ namespace SpreadsheetUtilities
             bool rp_prev = false;
             bool lp_prev = false;
 
-            //TODO: There's a much better way to format this. Start by checking if the first token
-            //is a double with try parse, if not, then do the rest.
 
-
-
-
-
-
-
-
-
-
-
-            //2.
             if (formula.Count() == 0)
                 throw new FormulaFormatException("Formula can't be empty.");
             foreach (string token in formula)
@@ -354,7 +341,7 @@ namespace SpreadsheetUtilities
                 //7
                 if (lp_prev)
                 {
-                    if (opPattern.IsMatch(token) || rpPattern.IsMatch(token))
+                    if ((!Double.TryParse(token, out double x) && opPattern.IsMatch(token)) || rpPattern.IsMatch(token))
                         throw new FormulaFormatException("Operators or closing parentheses can't follow an opening parenthesis.");
                     lp_prev = false;
                 }
@@ -368,8 +355,6 @@ namespace SpreadsheetUtilities
                 }
 
                 //5 & 6
-                string something = formula.First();
-                string something_else = formula.Last();
                 if (!Double.TryParse(formula.First(), out double first))
                 {
                     if (rpPattern.IsMatch(formula.First()) || opPattern.IsMatch(formula.First()))
@@ -396,7 +381,7 @@ namespace SpreadsheetUtilities
                 if (rp_count > lp_count)
                     throw new FormulaFormatException("More ) than ( in the formula.");
 
-                if (opPattern.IsMatch(token))
+                if (!Double.TryParse(token, out double v) && opPattern.IsMatch(token))
                     lp_prev = true;
                 if (Double.TryParse(token, out double o) || varPattern.IsMatch(token))
                     rp_prev = true;
