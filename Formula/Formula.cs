@@ -328,6 +328,19 @@ namespace SpreadsheetUtilities
             bool rp_prev = false;
             bool lp_prev = false;
 
+            //TODO: There's a much better way to format this. Start by checking if the first token
+            //is a double with try parse, if not, then do the rest.
+
+
+
+
+
+
+
+
+
+
+
             //2.
             if (formula.Count() == 0)
                 throw new FormulaFormatException("Formula can't be empty.");
@@ -355,10 +368,18 @@ namespace SpreadsheetUtilities
                 }
 
                 //5 & 6
-                if (rpPattern.IsMatch(formula.First()) || opPattern.IsMatch(formula.First()))
-                    throw new FormulaFormatException("Formula can't begin with a close parenthesis or operator.");
-                if (lpPattern.IsMatch(formula.Last()) || opPattern.IsMatch(formula.Last()))
-                    throw new FormulaFormatException("Last token can't be an operator or (");
+                string something = formula.First();
+                string something_else = formula.Last();
+                if (!Double.TryParse(formula.First(), out double first))
+                {
+                    if (rpPattern.IsMatch(formula.First()) || opPattern.IsMatch(formula.First()))
+                        throw new FormulaFormatException("Formula can't begin with a close parenthesis or operator.");
+                }
+                if (!Double.TryParse(formula.Last(), out double last))
+                {
+                    if (lpPattern.IsMatch(formula.Last()) || opPattern.IsMatch(formula.Last()))
+                        throw new FormulaFormatException("Last token can't be an operator or (");
+                }
 
                 if (lpPattern.IsMatch(token))
                 {
@@ -406,11 +427,11 @@ namespace SpreadsheetUtilities
         {
             Regex varPattern = new Regex(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
 
-            List<string> variables = new List<string>();
+            HashSet<string> variables = new HashSet<string>();
             foreach (string token in GetTokens(formula))
             {
                 if (varPattern.IsMatch(token) && isValid(normalize(token)))
-                    variables.Append(token);
+                    variables.Add(normalize(token));
             }
             return variables;
         }
