@@ -123,7 +123,37 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
-            throw new NotImplementedException();
+            if (!VariableRegex.IsMatch(name) || name is null)
+                throw new InvalidNameException();
+            if (formula is null)
+                throw new ArgumentNullException();
+
+            if (nonEmptyCells.ContainsKey(name))
+            {
+                IEnumerable<string> variables = new List<string>();
+                foreach (string variable in variables)
+                {
+                    if (cellDependencies.HasDependents(variable))
+                        throw new CircularException();
+                    cellDependencies.AddDependency(name, variable);
+                }
+                nonEmptyCells[name].Contents = formula;
+            }
+            else
+            {
+                IEnumerable<string> variables = new List<string>();
+                foreach (string variable in variables)
+                {
+                    if (cellDependencies.HasDependents(variable))
+                        throw new CircularException();
+                    cellDependencies.AddDependency(name, variable);
+                }
+                nonEmptyCells.Add(name, new Cell(name, formula));
+            }
+
+            IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
+            IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+            return ListDependents;
         }
 
         /// <summary>
