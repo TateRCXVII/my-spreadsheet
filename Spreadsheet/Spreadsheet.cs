@@ -6,7 +6,8 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        //private readonly static Regex VariableRegex = new Regex("^[a-zA-Z_]+[0-9]*");
+        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?:[a-zA-Z_]|\d)*");
         private Dictionary<String, Cell> nonEmptyCells;
         private DependencyGraph cellDependencies;
 
@@ -91,8 +92,6 @@ namespace SS
         {
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
-            if (text is null)
-                throw new ArgumentNullException();
 
             if (nonEmptyCells.ContainsKey(name))
             {
