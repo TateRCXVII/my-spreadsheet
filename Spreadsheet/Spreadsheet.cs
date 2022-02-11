@@ -122,7 +122,8 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
-            bool nameExists = false;//for catching and resetting the circular dependencies
+            bool nameExists;//for catching and resetting the circular dependencies
+            Object previousContents = nonEmptyCells[name].Contents;
 
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
@@ -139,15 +140,21 @@ namespace SS
             {
                 nonEmptyCells.Add(name, new Cell(name, formula));
                 cellDependencies.ReplaceDependees(name, formula.GetVariables());
+                nameExists = false;
             }
             try
             {
                 IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
                 return ListDependents;
             }
+            //Code help from TA office hrs
             catch (CircularException e)
             {
-                if ()
+                if (nameExists)
+                    nonEmptyCells[name].Contents = previousContents;
+                else
+                    nonEmptyCells.Remove(name);
+                throw;
             }
         }
 
