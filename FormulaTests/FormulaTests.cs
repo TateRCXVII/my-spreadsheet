@@ -467,7 +467,7 @@ namespace FormulaTests
         [TestCategory("Get Tokens")]
         public void GetVariablesDifferentCasesSimpleTest()
         {
-            Formula form1 = new Formula("40+30.5*100/xy1+Ab2+x3", s => s, s => true);
+            Formula form1 = new Formula("40+30.5*100/xy1+Ab2+x3", s => s.ToUpper(), s => true);
             List<string> expectedVars = new List<string>();
             expectedVars.Add("XY1");
             expectedVars.Add("AB2");
