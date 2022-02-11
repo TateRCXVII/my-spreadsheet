@@ -22,8 +22,19 @@ Future extensions are:
 
 # TODOS
 Improvements:
+- Formula validator is very messy...could use a refresh
 
-
+# Examples of Good Software Practice (GSP)
+- #### Separation of concerns
+  I feel like I not only break methods up into smaller pieces, but I'm actively trying to understand the outline of this assignment.
+It's cool to be able to watch the development of a useful app bit by bit.
+- #### D.R.Y.
+  This one could use some improvement, but I've always been focused on where I can create helper methods for repeated processes.
+Throughout the Formula and DependencyGraph classes I use quite a few helper methods to break processes up and ensure I don't repeat
+myself.
+- #### Documentation
+  I enjoy the documentation side of coding. It not only shows me that I understand the problem, but it helps me internalize what's
+being done with my code even further.
 # Time Expenditures:
 
     1. Assignment One:   Predicted Hours:          10        Actual Hours:     11       Notes: Found an error on Friday night and spent extra time fixing bugs.

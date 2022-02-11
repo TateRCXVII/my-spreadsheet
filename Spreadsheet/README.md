@@ -11,32 +11,35 @@ Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in A
 ```
 
 # Comments to Evaluators:
-There is only one branch that isn't checked by tests, which is the reason for the 99%. Because I get nervous about removing exception handling,
-I didn't delete the branch, even though I couldn't make a test case that would call that branch directly. I figured it'd be better to handle a rare 
-exception than to delete the branch and have it break my code later.
+The code in this assignment stands on its own. Citations are included for websites, TA help, and other help needed for the completion of this 
+assignment.
+
 # Time Estimate vs. Actual Breakdown
 |        | Expected | Actual | Notes                                                                                                                    |
 |--------|----------|--------|--------------------------------------------------------------------------------------------------------------------------|
-|Analysis| 3        | 5     | My first time reading the assignment I thought things were more simple than they were. So, the analysis took me much longer.|
-|Testing | 3        | 3      | I pushed myself to write tests first so I could really understand the assignment and how it would operate. This took a good chunk of time.                |
-|Implementation | 4        | 2      | Once I understood how to implement the changes, things fell into place quite well.                                                                |
-|Debug   | 2        | 2      | As I added more tests, more bugs were apparent.               |
-| Total: | 12       | 12      | This assignment, despite my initial misconception, took about the same time I had expected. The time allotment just fell into different categories.  |
+|Analysis| 2        | 3    | I was pretty close with my initial analysis of the problem. I did have to go back a few times and reread, which took me a little while.|
+|Testing | 3        | 3      | I worked hard on testing first! Helped me understand the problem more. |
+|Implementation | 1        | 2      | My initial thought that this would be a little more simple than it was. Fixing edge cases dragged the process out.                                           |
+|Debug   | 2        | 3      | I had a frustrating night trying to figure out all the regex stuff... that was a big chunk of time.             |
+| Total: | 8       | 11      |   |
 
 # Assignment Specific Topics
-Funcs and Lambdas are very useful! Glad C# lets us pass functions as parameters.
+This assignment helped me internalize the benefits of starting with good code and using DRY principles. Having the ability to
+use methods and functionality we implemented in the past was really cool! Gave me a good perspective on everything.
+### Cell Class
+This project also includes a cell class which represents a cell in the Spreadsheet. The cell can contain a formula, text, or value
+at this stage of the Spreadsheet.
 
 # Consulted Peers:
-I should branch out to include new people...
+- Johnny
+- Collin Tree
 - Sanjay Gounder
 - Thatcher Geary
+- TA Help Hours
 
 
 # References:
 
-    1. Double.TryParse() - https://stackoverflow.com/questions/6733652/how-can-i-check-if-a-string-is-a-number/6733665
-    2. Double divide by 0 value - https://stackoverflow.com/questions/44258124/divide-by-zero-and-no-error/44258269
-    3. Casting - https://stackoverflow.com/questions/18784274/converting-object-of-a-class-to-of-another-one
-    4. Catch different exceptions - https://stackoverflow.com/questions/136035/catch-multiple-exceptions-at-once
-    5. .NET Core .GetHashCode() - https://andrewlock.net/why-is-string-gethashcode-different-each-time-i-run-my-program-in-net-core/
-    6. == vs Equals - https://stackoverflow.com/questions/814878/c-sharp-difference-between-and-equals
+    1. Namespace typing error - https://teamtreehouse.com/community/is-a-namespace-but-is-used-like-a-type
+    2. Casting (again) - https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/casting-and-type-conversions
+    3. Adding to .gitignore - https://elanderson.net/2020/10/add-git-ignore-to-an-existing-visual-studio-solution-new-git-experience/#:~:text=Open%20Visual%20Studio%20and%20the,Add%20button%20for%20Ignore%20file.
