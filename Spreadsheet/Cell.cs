@@ -7,7 +7,14 @@ using System.Threading.Tasks;
 
 namespace Spreadsheet
 {
-    internal class Cell
+    /// <summary>
+    /// Represents a cell in the spreadsheet.
+    /// Cells have a name, contents, and a value.
+    /// Contents are displayed when the cell is in edit mode.
+    /// Value is displayed on screen.
+    /// The name must fit the permitted variable name of the overall project.
+    /// </summary>
+    public class Cell
     {
         //Name of the cell
         private string _name;

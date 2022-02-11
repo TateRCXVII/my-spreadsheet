@@ -20,9 +20,7 @@ namespace SS
             cellDependencies = new DependencyGraph();
         }
 
-        /// <summary>
-        /// Returns the contents of the cell. 
-        /// </summary>
+        ///<inheritdoc/>
         /// <param name="name">the name of the cell</param>
         /// <returns>The contents of the cell</returns>
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
@@ -34,20 +32,14 @@ namespace SS
             return nonEmptyCells[name].Contents;
         }
 
-        /// <summary>
-        /// Returns an IEnumberable object that contains a list of all 
-        /// non-empty cells.
-        /// </summary>
+        ///<inheritdoc/>
         /// <returns>Names of Non Empty cells</returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             return nonEmptyCells.Keys;
         }
 
-
-        /// <summary>
-        /// Sets the contents of the cell to a number. 
-        /// </summary>
+        ///<inheritdoc/>
         /// <param name="name">the name of the cell</param>
         /// <param name="number">the double value to set the cell to</param>
         /// <returns>
@@ -75,9 +67,7 @@ namespace SS
             return ListDependents;
         }
 
-        /// <summary>
-        /// Sets the contents of the cell to some text. 
-        /// </summary>
+        ///<inheritdoc/>
         /// <param name="name">the name of the cell</param>
         /// <param name="text">the text to be displayed in the cell</param>
         /// <returns>
@@ -106,9 +96,7 @@ namespace SS
             return ListDependents;
         }
 
-        /// <summary>
-        /// Sets the contents of the cell to a formula. 
-        /// </summary>
+        ///<inheritdoc/>
         /// <param name="name">the name of the cell</param>
         /// <param name="formula">the formula to be displayed in the cell</param>
         /// <returns>
@@ -122,16 +110,17 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
-            bool nameExists;//for catching and resetting the circular dependencies
-            Object previousContents = nonEmptyCells[name].Contents;
-
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (formula is null)
                 throw new ArgumentNullException();
 
+            bool nameExists;//for catching and resetting the circular dependencies
+            Object previousContents = "";
+
             if (nonEmptyCells.ContainsKey(name))
             {
+                previousContents = nonEmptyCells[name].Contents;
                 cellDependencies.ReplaceDependees(name, formula.GetVariables());
                 nonEmptyCells[name].Contents = formula;
                 nameExists = true;
@@ -139,6 +128,7 @@ namespace SS
             else
             {
                 nonEmptyCells.Add(name, new Cell(name, formula));
+                IEnumerable<string> variables = formula.GetVariables();
                 cellDependencies.ReplaceDependees(name, formula.GetVariables());
                 nameExists = false;
             }
@@ -154,21 +144,16 @@ namespace SS
                     nonEmptyCells[name].Contents = previousContents;
                 else
                     nonEmptyCells.Remove(name);
-                throw;
+                throw e;
             }
         }
 
-        /// <summary>
-        /// Returns an IEnumberable list of all the direct dependents of the named cell.
-        /// </summary>
+        ///<inheritdoc/>
         /// <param name="name">the name of the cell which dependents will be returned</param>
         /// <returns>an enumeration of the dependents of the named cell</returns>
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (!VariableRegex.IsMatch(name))
-                throw new InvalidNameException();
-
             return cellDependencies.GetDependents(name);
         }
     }

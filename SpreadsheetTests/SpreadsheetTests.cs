@@ -72,6 +72,22 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
+        /// See title (more complex version 3)
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        [ExpectedException(typeof(CircularException))]
+        public void CircularExceptionReplaceTest()
+        {
+            AbstractSpreadsheet spreadsheet = new SS.Spreadsheet();
+            Formula formula3 = new Formula("C1");
+            Formula formula4 = new Formula("B1+B1");
+            spreadsheet.SetCellContents("C1", formula4);
+            spreadsheet.SetCellContents("B1", "Apple");
+            spreadsheet.SetCellContents("B1", formula3);
+        }
+
+        /// <summary>
         /// See name
         /// </summary>
         [TestMethod]
@@ -189,10 +205,19 @@ namespace SpreadsheetTests
         public void SetCellContentsFormulaTest()
         {
             SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
-            Formula formula = new Formula("300 + 3e-15 + B2");
-            IList<string> cellNames = spreadsheet.SetCellContents("A1", formula);
+            Formula formula1 = new Formula("300 + 3e-15 + B2");
+            Formula formula2 = new Formula("A1*2");
+            spreadsheet.SetCellContents("B1", formula2);
+            spreadsheet.SetCellContents("C1", formula2);
+            IList<string> cellNames = spreadsheet.SetCellContents("A1", formula1);
             IList<string> expected = new List<string>();
-            Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula);
+            expected.Add("A1");
+            expected.Add("B1");
+            expected.Add("C1");
+            foreach (string cell in cellNames)
+                Assert.IsTrue(expected.Contains(cell));
+
+            Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula1);
         }
 
         /// <summary>
@@ -247,6 +272,44 @@ namespace SpreadsheetTests
             spreadsheet.SetCellContents("A1", 30);
             spreadsheet.SetCellContents("A1", 40);
             Assert.AreEqual(40.0, spreadsheet.GetCellContents("A1"));
+        }
+
+        /****************** SET CELL CONTENTS LIST TESTS ***************/
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void SetCellContentsTextListTest()
+        {
+            SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
+            Formula formula1 = new Formula("300 + 3e-15 + B2");
+            Formula formula2 = new Formula("A1*2");
+            spreadsheet.SetCellContents("B1", formula2);
+            spreadsheet.SetCellContents("C1", formula2);
+            IList<string> cellNames = spreadsheet.SetCellContents("A1", formula1);
+            IList<string> expected = new List<string>();
+            expected.Add("A1");
+            expected.Add("B1");
+            expected.Add("C1");
+            foreach (string cell in cellNames)
+                Assert.IsTrue(expected.Contains(cell));
+
+            Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula1);
+        }
+
+
+        /******************* CELL CLASS TESTS ***************/
+        /// <summary>
+        /// Replace existing data in a cell
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void CellConstructorTest()
+        {
+            Spreadsheet.Cell cell = new Spreadsheet.Cell("A1");
+            Assert.AreEqual("A1", cell.Name);
         }
     }
 }
