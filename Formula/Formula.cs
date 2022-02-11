@@ -47,7 +47,7 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         //Regex object to check if a token is a variable (any # of letters followed by any # of digits)
-        private readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        private readonly static Regex VariableRegex = new(@"^[a-zA-Z_](?: [a-zA-Z_]|\d)*");
         private readonly string formula;
         private readonly Func<string, string> normalize;
         private readonly Func<string, bool> isValid;

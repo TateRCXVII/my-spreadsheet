@@ -6,7 +6,7 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private readonly static Regex VariableRegex = new(@"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?: [a-zA-Z_]|\d)*");
         private Dictionary<String, Cell> nonEmptyCells;
         private DependencyGraph cellDependencies;
 
@@ -130,7 +130,7 @@ namespace SS
 
             if (nonEmptyCells.ContainsKey(name))
             {
-                IEnumerable<string> variables = new List<string>();
+                IEnumerable<string> variables = formula.GetVariables();
                 foreach (string variable in variables)
                 {
                     if (cellDependencies.HasDependents(variable))
@@ -141,7 +141,7 @@ namespace SS
             }
             else
             {
-                IEnumerable<string> variables = new List<string>();
+                IEnumerable<string> variables = formula.GetVariables();
                 foreach (string variable in variables)
                 {
                     if (cellDependencies.HasDependents(variable))
@@ -168,15 +168,6 @@ namespace SS
                 throw new InvalidNameException();
 
             return cellDependencies.GetDependents(name);
-        }
-
-
-        private void SetStringOrText(object name)
-        {
-            if (!(name is double) || !(name is string))
-                return;
-
-
         }
     }
 }
