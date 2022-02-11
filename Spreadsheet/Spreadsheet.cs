@@ -122,6 +122,8 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
+            bool nameExists = false;//for catching and resetting the circular dependencies
+
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (formula is null)
@@ -129,30 +131,24 @@ namespace SS
 
             if (nonEmptyCells.ContainsKey(name))
             {
-                IEnumerable<string> variables = formula.GetVariables();
-                foreach (string variable in variables)
-                {
-                    if (cellDependencies.HasDependents(variable))
-                        throw new CircularException();
-                    cellDependencies.AddDependency(name, variable);
-                }
+                cellDependencies.ReplaceDependees(name, formula.GetVariables());
                 nonEmptyCells[name].Contents = formula;
+                nameExists = true;
             }
             else
             {
-                IEnumerable<string> variables = formula.GetVariables();
-                foreach (string variable in variables)
-                {
-                    if (cellDependencies.HasDependents(variable))
-                        throw new CircularException();
-                    cellDependencies.AddDependency(name, variable);
-                }
                 nonEmptyCells.Add(name, new Cell(name, formula));
+                cellDependencies.ReplaceDependees(name, formula.GetVariables());
             }
-
-            IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
-            IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
-            return ListDependents;
+            try
+            {
+                IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+                return ListDependents;
+            }
+            catch (CircularException e)
+            {
+                if ()
+            }
         }
 
         /// <summary>

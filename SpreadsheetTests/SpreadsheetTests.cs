@@ -153,8 +153,14 @@ namespace SpreadsheetTests
         public void SetCellContentsStringTest()
         {
             SS.Spreadsheet sheet = new SS.Spreadsheet();
-            sheet.SetCellContents("A1", "Apple");
+            IList<string> expected = new List<string>();
+            IList<string> cellNames = sheet.SetCellContents("A1", "Apple");
+            expected.Add("A1");
+            foreach (string cell in cellNames)
+                Assert.IsTrue(expected.Contains(cell));
+
             Assert.AreEqual(sheet.GetCellContents("A1"), "Apple");
+
         }
 
         /// <summary>
@@ -165,8 +171,13 @@ namespace SpreadsheetTests
         public void SetCellContentsTextReplaceTest()
         {
             SS.Spreadsheet sheet = new SS.Spreadsheet();
-            sheet.SetCellContents("A1", "Apple");
-            sheet.SetCellContents("A1", "Pear");
+            IList<string> cellNames1 = sheet.SetCellContents("A1", "Apple");
+            IList<string> cellNames2 = sheet.SetCellContents("A1", "Pear");
+            Assert.AreEqual(1, cellNames2.Count);
+            IList<string> expected = new List<string>();
+            expected.Add("A1");
+            foreach (string cell in cellNames2)
+                Assert.IsTrue(expected.Contains(cell));
             Assert.AreEqual(sheet.GetCellContents("A1"), "Pear");
         }
 
@@ -179,7 +190,8 @@ namespace SpreadsheetTests
         {
             SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
             Formula formula = new Formula("300 + 3e-15 + B2");
-            spreadsheet.SetCellContents("A1", formula);
+            IList<string> cellNames = spreadsheet.SetCellContents("A1", formula);
+            IList<string> expected = new List<string>();
             Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula);
         }
 
@@ -191,10 +203,11 @@ namespace SpreadsheetTests
         public void SetCellContentsFormulaReplaceTest()
         {
             SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
-            Formula formula1 = new Formula("300 + 3e-15 + B2");
+            Formula formula1 = new Formula("300 + 3e-3 + B4");
             Formula formula2 = new Formula("3005 + 3e-150 + B24");
-            spreadsheet.SetCellContents("A1", formula1);
-            spreadsheet.SetCellContents("A1", formula2);
+            IList<string> cellNames1 = spreadsheet.SetCellContents("A1", formula1);
+            Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula1);
+            IList<string> cellNames2 = spreadsheet.SetCellContents("A1", formula2);
             Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula2);
         }
 
