@@ -9,6 +9,23 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadsheetTests
     {
+
+        /************* CONSTRUCTOR TEST ************/
+        /// <summary>
+        /// See title
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void SpreadsheetConstructorTest()
+        {
+            Spreadsheet spreadsheet = new Spreadsheet();
+            spreadsheet.GetCellContents("A1");
+
+        }
+
+
+
         /************* EXCEPTION TESTS **************/
 
         /// <summary>
