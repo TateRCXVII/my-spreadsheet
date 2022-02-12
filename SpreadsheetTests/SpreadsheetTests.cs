@@ -281,6 +281,27 @@ namespace SpreadsheetTests
         /// </summary>
         [TestMethod]
         [Timeout(5000)]
+        public void SetCellContentsNumberListTest()
+        {
+            SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
+            Formula formula1 = new Formula("300 + 3e-15 + B2");
+            Formula formula2 = new Formula("A1*2");
+            spreadsheet.SetCellContents("B1", formula2);
+            spreadsheet.SetCellContents("C1", formula2);
+            IList<string> cellNames = spreadsheet.SetCellContents("A1", 30);
+            IList<string> expected = new List<string>();
+            expected.Add("A1");
+            expected.Add("B1");
+            expected.Add("C1");
+            foreach (string cell in cellNames)
+                Assert.IsTrue(expected.Contains(cell));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
         public void SetCellContentsTextListTest()
         {
             SS.Spreadsheet spreadsheet = new SS.Spreadsheet();
@@ -288,15 +309,13 @@ namespace SpreadsheetTests
             Formula formula2 = new Formula("A1*2");
             spreadsheet.SetCellContents("B1", formula2);
             spreadsheet.SetCellContents("C1", formula2);
-            IList<string> cellNames = spreadsheet.SetCellContents("A1", formula1);
+            IList<string> cellNames = spreadsheet.SetCellContents("A1", "This is a test.");
             IList<string> expected = new List<string>();
             expected.Add("A1");
             expected.Add("B1");
             expected.Add("C1");
             foreach (string cell in cellNames)
                 Assert.IsTrue(expected.Contains(cell));
-
-            Assert.IsTrue((Formula)spreadsheet.GetCellContents("A1") == formula1);
         }
 
 

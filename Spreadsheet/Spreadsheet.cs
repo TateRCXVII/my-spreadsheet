@@ -6,7 +6,6 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        //private readonly static Regex VariableRegex = new Regex("^[a-zA-Z_]+[0-9]*");
         private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?:[a-zA-Z_]|\d)*");
         private Dictionary<String, Cell> nonEmptyCells;
         private DependencyGraph cellDependencies;

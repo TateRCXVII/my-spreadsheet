@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using FormulaEvaluator;
+﻿using FormulaEvaluator;
 
 //simple tests
 if (Evaluator.Evaluate("25/5", null) == 5) Console.WriteLine("Happy Day!25/5 works");
@@ -55,12 +54,13 @@ void TestEvaluate(string expression, Evaluator.Lookup var, int expected, string 
 {
     try
     {
-       int actual = Evaluator.Evaluate(expression, var);
+        int actual = Evaluator.Evaluate(expression, var);
         if (actual != expected)
             Console.WriteLine(description + " " + expression + " error.");
-    } catch(ArgumentException e)
+    }
+    catch (ArgumentException e)
     {
-       Console.WriteLine(e.Message + " Invalid input or divide by 0");
+        Console.WriteLine(e.Message + " Invalid input or divide by 0");
     }
 }
 
