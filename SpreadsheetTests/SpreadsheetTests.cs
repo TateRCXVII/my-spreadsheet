@@ -327,7 +327,7 @@ namespace SpreadsheetTests
         [Timeout(5000)]
         public void CellConstructorTest()
         {
-            Spreadsheet.Cell cell = new Spreadsheet.Cell("A1");
+            Cell cell = new Cell("A1");
             Assert.AreEqual("A1", cell.Name);
         }
     }
