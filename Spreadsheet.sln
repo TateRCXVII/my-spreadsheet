@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spreadsheet", "Spreadsheet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{ED7D5853-A8B6-4B4A-99D4-BAC5B8C9FDED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4Tests", "PS4Tests\PS4Tests.csproj", "{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{ED7D5853-A8B6-4B4A-99D4-BAC5B8C9FDED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED7D5853-A8B6-4B4A-99D4-BAC5B8C9FDED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED7D5853-A8B6-4B4A-99D4-BAC5B8C9FDED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
