@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 
 namespace SS
-{//hello
+{
     public class Spreadsheet : AbstractSpreadsheet
     {
         private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?:[a-zA-Z_]|\d)*");
@@ -24,8 +24,10 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
-            if (!VariableRegex.IsMatch(name) || !nonEmptyCells.ContainsKey(name))
+            if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
+            if (!nonEmptyCells.ContainsKey(name))
+                return "";
 
             return nonEmptyCells[name].Contents;
         }
@@ -80,6 +82,9 @@ namespace SS
         {
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
+
+            if (text == "")
+                return new List<string>();
 
             if (nonEmptyCells.ContainsKey(name))
             {
