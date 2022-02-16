@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_The_Evaluator_Console_
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD81F364-9F34-426B-A471-228F9495C343}"
 	ProjectSection(SolutionItems) = preProject
+		Whiteboard\architecture.jpg = Whiteboard\architecture.jpg
+		Whiteboard\dependency_graph_whiteboard.jpg = Whiteboard\dependency_graph_whiteboard.jpg
+		Whiteboard\formula_whiteboard.jpg = Whiteboard\formula_whiteboard.jpg
 		README.md = README.md
+		Whiteboard\spreadsheet_whiteboard.jpg = Whiteboard\spreadsheet_whiteboard.jpg
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyGraphTests", "DependencyGraphTests\DependencyGraphTests.csproj", "{865C1145-A54B-4542-B690-56C221AF4826}"
@@ -30,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spreadsheet", "Spreadsheet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{ED7D5853-A8B6-4B4A-99D4-BAC5B8C9FDED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4Tests", "PS4Tests\PS4Tests.csproj", "{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PS4Tests", "PS4Tests\PS4Tests.csproj", "{1969C5F8-D1A7-4D45-BA17-B8785D3D97F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
