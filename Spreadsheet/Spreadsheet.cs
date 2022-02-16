@@ -20,10 +20,15 @@ namespace SS
         /// imposes no extra validity conditions, normalizes every cell name to itself, 
         /// and use the name "default" as the version.
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet() :
+            base(s => true, s => s, "default")
         {
-            nonEmptyCells = new Dictionary<String, Cell>();
-            cellDependencies = new DependencyGraph();
+            this.normalize = s => s;
+            this.isValid = s => true;
+            this.version = "default";
+            this.changed = true;
+            this.nonEmptyCells = new Dictionary<String, Cell>();
+            this.cellDependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -35,9 +40,15 @@ namespace SS
         /// <param name="isValid"></param>
         /// <param name="normalize"></param>
         /// <param name="version"></param>
-        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version)
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version)
         {
-
+            this.isValid = isValid;
+            this.normalize = normalize;
+            this.version = version;
+            this.changed = true;
+            this.nonEmptyCells = new Dictionary<String, Cell>();
+            this.cellDependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -52,9 +63,16 @@ namespace SS
         /// <param name="isValid"></param>
         /// <param name="normalize"></param>
         /// <param name="version"></param>
-        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version)
+        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version)
         {
-
+            //TODO: handle loading from filepath
+            this.isValid = isValid;
+            this.normalize = normalize;
+            this.version = version;
+            this.changed = true;
+            this.nonEmptyCells = new Dictionary<String, Cell>();
+            this.cellDependencies = new DependencyGraph();
         }
 
         ///<inheritdoc/>
@@ -63,6 +81,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
+            name = this.normalize(name);
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (!nonEmptyCells.ContainsKey(name))
@@ -92,6 +111,7 @@ namespace SS
         //TODO: Implement
         public override object GetCellValue(string name)
         {
+            name = this.normalize(name);
             throw new NotImplementedException();
         }
 
@@ -131,7 +151,8 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            if (!VariableRegex.IsMatch(name))
+            name = this.normalize(name);
+            if (invalidVariable(name))
                 throw new InvalidNameException();
 
             if (nonEmptyCells.ContainsKey(name))
@@ -160,7 +181,8 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            if (!VariableRegex.IsMatch(name))
+            name = this.normalize(name);
+            if (invalidVariable(name))
                 throw new InvalidNameException();
 
             if (text == "")
@@ -193,7 +215,8 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            if (!VariableRegex.IsMatch(name))
+            name = this.normalize(name);
+            if (invalidVariable(name))
                 throw new InvalidNameException();
             if (formula is null)
                 throw new ArgumentNullException();
@@ -238,6 +261,16 @@ namespace SS
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
             return cellDependencies.GetDependents(name);
+        }
+
+        /// <summary>
+        /// Helper method to determine if a variable is valid on both validity requirements.
+        /// </summary>
+        /// <param name="name">name of cell</param>
+        /// <returns>true if the variable is invalid, false otherwise</returns>
+        private bool invalidVariable(string name)
+        {
+            return !VariableRegex.IsMatch(name) && !this.isValid(name);
         }
     }
 
