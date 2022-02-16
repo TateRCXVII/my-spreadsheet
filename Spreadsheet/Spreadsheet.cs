@@ -5,14 +5,19 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z_](?:[a-zA-Z_]|\d)*");
+        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z](?:[a-zA-Z]|\d)*"); //removed _ as valid var input
         private Dictionary<String, Cell> nonEmptyCells;
         private DependencyGraph cellDependencies;
+        //indicates if the sheet has been changed and not saved
+        private bool changed;
+        private string version;
+        private readonly Func<string, string> normalize;
+        private readonly Func<string, bool> isValid;
 
         /// <summary>
         /// Creates an empty spreadsheet
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet() //TODO: Remove (?)
         {
             nonEmptyCells = new Dictionary<String, Cell>();
             cellDependencies = new DependencyGraph();
@@ -32,6 +37,28 @@ namespace SS
             return nonEmptyCells[name].Contents;
         }
 
+        //TODO: Implement
+        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+
+        //TODO: Implement
+        public override object GetCellValue(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        //TODO: Implement
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        //TODO: Implement
+        public override void Save(string filename)
+        {
+            //TODO: manage the changed variable here (i.e. set back to false)
+            throw new NotImplementedException();
+        }
+
         ///<inheritdoc/>
         /// <returns>Names of Non Empty cells</returns>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
@@ -49,7 +76,7 @@ namespace SS
         /// list {A1, B1, C1} is returned.
         /// </returns>
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
-        public override IList<string> SetCellContents(string name, double number)
+        protected override IList<string> SetCellContents(string name, double number)
         {
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
@@ -78,7 +105,7 @@ namespace SS
         /// </returns>
         /// <exception cref="ArgumentNullException">If the text is null, throws ArgumentNullException</exception>
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
-        public override IList<string> SetCellContents(string name, string text)
+        protected override IList<string> SetCellContents(string name, string text)
         {
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
@@ -111,7 +138,7 @@ namespace SS
         /// <exception cref="ArgumentNullException">If the Formula is null, throws ArgumentNullException</exception>
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
-        public override IList<string> SetCellContents(string name, Formula formula)
+        protected override IList<string> SetCellContents(string name, Formula formula)
         {
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
@@ -151,6 +178,11 @@ namespace SS
             }
         }
 
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            throw new NotImplementedException();
+        }
+
         ///<inheritdoc/>
         /// <param name="name">the name of the cell which dependents will be returned</param>
         /// <returns>an enumeration of the dependents of the named cell</returns>
@@ -160,6 +192,8 @@ namespace SS
             return cellDependencies.GetDependents(name);
         }
     }
+
+
 
     /// <summary>
     /// Represents a cell in the spreadsheet.
