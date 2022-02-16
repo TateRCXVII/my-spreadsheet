@@ -16,11 +16,45 @@ namespace SS
 
         /// <summary>
         /// Creates an empty spreadsheet
+        /// Your zero-argument constructor should create an empty spreadsheet that
+        /// imposes no extra validity conditions, normalizes every cell name to itself, 
+        /// and use the name "default" as the version.
         /// </summary>
-        public Spreadsheet() //TODO: Remove (?)
+        public Spreadsheet()
         {
             nonEmptyCells = new Dictionary<String, Cell>();
             cellDependencies = new DependencyGraph();
+        }
+
+        /// <summary>
+        /// You should add a three-argument constructor to the Spreadsheet class. 
+        /// Just like the zero-argument constructor, it should create an empty spreadsheet. 
+        /// However, it should allow the user to provide a validity delegate (first parameter), 
+        /// a normalization delegate (second parameter), and a version (third parameter).
+        /// </summary>
+        /// <param name="isValid"></param>
+        /// <param name="normalize"></param>
+        /// <param name="version"></param>
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version)
+        {
+
+        }
+
+        /// <summary>
+        /// You should add a four-argument constructor to the Spreadsheet class. 
+        /// It should allow the user to provide a string representing a path to a file 
+        /// (first parameter), a validity delegate (second parameter), a normalization delegate
+        /// (third parameter), and a version (fourth parameter). It should read a saved spreadsheet 
+        /// from the file (see the Save method) and use it to construct a new spreadsheet. 
+        /// The new spreadsheet should use the provided validity delegate, normalization delegate, 
+        /// and version. Do not try to implement loading from file until after we have discussed XML in class. 
+        /// </summary>
+        /// <param name="isValid"></param>
+        /// <param name="normalize"></param>
+        /// <param name="version"></param>
+        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version)
+        {
+
         }
 
         ///<inheritdoc/>
@@ -37,8 +71,23 @@ namespace SS
             return nonEmptyCells[name].Contents;
         }
 
-        //TODO: Implement
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+        /// <inheritdoc/>
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            if (Double.TryParse(content, out double value))
+                return this.SetCellContents(name, value);
+            else if (content.StartsWith("="))
+                return this.SetCellContents(name, new Formula(content.Substring(1), this.normalize, this.isValid));
+            else
+                return this.SetCellContents(name, content);
+        }
+
+        /// <inheritdoc/>
+        public override bool Changed
+        {
+            get => changed;
+            protected set => changed = value;
+        }
 
         //TODO: Implement
         public override object GetCellValue(string name)
@@ -47,6 +96,10 @@ namespace SS
         }
 
         //TODO: Implement
+        //If the version of the saved spreadsheet does not match the version parameter provided to the constructor
+        //If any of the names contained in the saved spreadsheet are invalid
+        //If any invalid formulas or circular dependencies are encountered
+        //If there are any problems opening, reading, or closing the file
         public override string GetSavedVersion(string filename)
         {
             throw new NotImplementedException();
@@ -176,11 +229,6 @@ namespace SS
                     nonEmptyCells.Remove(name);
                 throw e;
             }
-        }
-
-        public override IList<string> SetContentsOfCell(string name, string content)
-        {
-            throw new NotImplementedException();
         }
 
         ///<inheritdoc/>

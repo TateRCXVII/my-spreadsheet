@@ -17,12 +17,24 @@ namespace SpreadsheetTests
         /// </summary>
         [TestMethod]
         [Timeout(5000)]
+        [ExpectedException(typeof(SpreadsheetUtilities.FormulaFormatException))]
+        public void InvalidVariableSetTest()
+        {
+            AbstractSpreadsheet spreadsheet = new SS.Spreadsheet();
+            spreadsheet.SetContentsOfCell("A1", "=XYZ");
+        }
+
+        /// <summary>
+        /// See title
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
         [ExpectedException(typeof(CircularException))]
         public void CircularExceptionTest()
         {
             AbstractSpreadsheet spreadsheet = new SS.Spreadsheet();
             Formula formula = new Formula("A1+B1");
-            spreadsheet.SetCellContents("A1", formula);
+            spreadsheet.SetContentsOfCell("A1", "=A1+B1");
         }
 
         /// <summary>
@@ -37,9 +49,9 @@ namespace SpreadsheetTests
             Formula formula1 = new Formula("B1");
             Formula formula2 = new Formula("C1");
             Formula formula3 = new Formula("A1 + B1");
-            spreadsheet.SetCellContents("A1", formula1);
-            spreadsheet.SetCellContents("B1", formula2);
-            spreadsheet.SetCellContents("C1", formula3);
+            spreadsheet.SetContentsOfCell("A1", "=B1");
+            spreadsheet.SetContentsOfCell("B1", "=C1");
+            spreadsheet.SetContentsOfCell("C1", "=A1 + B1");
         }
 
         /// <summary>
@@ -53,8 +65,8 @@ namespace SpreadsheetTests
             AbstractSpreadsheet spreadsheet = new SS.Spreadsheet();
             Formula formula2 = new Formula("(((2 + _x1+B1)*3e-2))");
             Formula formula3 = new Formula("B3+C4+C5");
-            spreadsheet.SetCellContents("A1", formula3);
-            spreadsheet.SetCellContents("B1", formula2);
+            spreadsheet.SetContentsOfCell("B1", "=(((2 + x1+B1)*3e-2))");
+            spreadsheet.SetContentsOfCell("A1", "=B3+C4+C5");
         }
 
         /// <summary>
@@ -158,6 +170,35 @@ namespace SpreadsheetTests
             {
                 Assert.IsTrue(expected.Contains(name));
             }
+        }
+
+        /********************* GETTERS AND SETTERS ****************************/
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void ChangedTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "Hello");
+            Assert.IsTrue(sheet.Changed);
+            sheet.Save(""); //TODO: Filepath?
+            Assert.IsFalse(sheet.Changed);
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void VersionTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "Hello");
+            Assert.IsTrue(sheet.Changed);
+            sheet.Save(""); //TODO: Filepath?
+            Assert.IsFalse(sheet.Changed);
         }
 
         /********************* SET CELL CONTENTS TESTS ************************/
