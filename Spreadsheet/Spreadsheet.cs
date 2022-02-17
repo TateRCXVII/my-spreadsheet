@@ -109,10 +109,24 @@ namespace SS
             protected set => changed = value;
         }
 
-        //TODO: Implement
+        /// <inheritdoc/>
+        /// <param name="name">the name of the cell (will be normalized)</param>
+        /// <returns>the value of the cell</returns>
+        /// <exception cref="InvalidNameException">If the name is invalid, throws exception</exception>
         public override object GetCellValue(string name)
         {
             name = this.normalize(name);
+            if (invalidVariable(name))
+                throw new InvalidNameException();
+            if (nonEmptyCells.ContainsKey(name))
+                return nonEmptyCells[name].Value;
+            else
+                return "";
+        }
+
+        //TODO: Implement
+        public override string GetSavedVersion(string filename)
+        {
             throw new NotImplementedException();
         }
 
@@ -121,12 +135,6 @@ namespace SS
         //If any of the names contained in the saved spreadsheet are invalid
         //If any invalid formulas or circular dependencies are encountered
         //If there are any problems opening, reading, or closing the file
-        public override string GetSavedVersion(string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        //TODO: Implement
         public override void Save(string filename)
         {
             //TODO: manage the changed variable here (i.e. set back to false)
@@ -234,7 +242,7 @@ namespace SS
             }
             else
             {
-                nonEmptyCells.Add(name, new Cell(name, formula));
+                nonEmptyCells.Add(name, new Cell(name, formula, lookup));
                 IEnumerable<string> variables = formula.GetVariables();
                 cellDependencies.ReplaceDependees(name, formula.GetVariables());
                 nameExists = false;
@@ -273,6 +281,20 @@ namespace SS
         {
             return !VariableRegex.IsMatch(name) && !this.isValid(name);
         }
+
+        /// <summary>
+        /// A helper method to help with the lookup of cell names 
+        /// to evaluate the functions
+        /// </summary>
+        /// <param name="name">looked-up cell name</param>
+        /// <returns>the double value of the referenced cell name</returns>
+        /// <exception cref="ArgumentException">throws an argument exception if the looked up value is not a double</exception>
+        private double lookup(string name)
+        {
+            if (nonEmptyCells[name].Value is not Double)
+                throw new ArgumentException();
+            else return (Double)nonEmptyCells[name].Value;
+        }
     }
 
 
@@ -295,22 +317,28 @@ namespace SS
         //new SS = ""
         private object _contents;
 
-        /// <summary>
-        /// Creates an empty cell
-        /// </summary>
-        public Cell(string name)
-        {
-            _name = name;
-            _contents = "";
-        }
+        //what is displayed in the cell without selection
+        //Double or formula error
+        private object _value;
+
+        //TODO: Delete this
+        /*        /// <summary>
+                /// Creates an empty cell
+                /// </summary>
+                public Cell(string name)
+                {
+                    _name = name;
+                    _contents = "";
+                }*/
 
         /// <summary>
         /// Creates a cell with formula as contents and its result as its value.
         /// </summary>
-        public Cell(string name, Formula formula)
+        public Cell(string name, Formula formula, Func<string, double> lookup)
         {
             _name = name;
             _contents = formula;
+            _value = formula.Evaluate(lookup);
         }
 
         /// <summary>
@@ -320,6 +348,7 @@ namespace SS
         {
             _name = name;
             _contents = number;
+            _value = number;
         }
 
         /// <summary>
@@ -329,9 +358,11 @@ namespace SS
         {
             _name = name;
             _contents = text;
+            _value = text;
         }
 
         #region Properties
+        //TODO: Do I want these all public?
         public string Name
         {
             get { return _name; }
@@ -341,6 +372,12 @@ namespace SS
         {
             get { return _contents; }
             set { _contents = value; }
+        }
+
+        public object Value
+        {
+            get { return _value; }
+            protected set { _value = value; }
         }
 
         #endregion

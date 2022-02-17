@@ -1,11 +1,11 @@
 ```
 Author:     Tate Reynolds
 Partner:    None
-Date:       11-Feb-2022
+Date:       18-Feb-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
 Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII
-Commit #:   f3ee84a8908597deba8425358c95230f2bb1b03b
+Commit #:   ********************
 Solution:   Spreadsheet
 Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in Academic Coursework.
 ```
@@ -16,7 +16,8 @@ Spreadsheet project current capabilities:
 - Dependency graphs
 - Circular Dependency handling
 - Cell creation
-- Filling cells
+- Filling cells (contents and values)
+- Invalid formulas and variable names are handled to display in the cell
 Future extensions are:  
 - GUI/UX/UIX
 
@@ -35,6 +36,9 @@ myself.
 - #### Documentation
   I enjoy the documentation side of coding. It not only shows me that I understand the problem, but it helps me internalize what's
 being done with my code even further.
+- #### Object-Oriented Principles
+  I try to think about how different objects should be separated (much like separation of concerns), but from a perspective
+of what makes sense for certain classes. I'm often thinking about the longevity of the project.
 # Time Expenditures:
 
     1. Assignment One:   Predicted Hours:          10        Actual Hours:     11       Notes: Found an error on Friday night and spent extra time fixing bugs.
