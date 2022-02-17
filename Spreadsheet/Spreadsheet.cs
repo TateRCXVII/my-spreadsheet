@@ -174,6 +174,8 @@ namespace SS
 
             IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
             IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+            reevaluateCells(ListDependents);
+            changed = true;
             return ListDependents;
         }
 
@@ -207,6 +209,8 @@ namespace SS
 
             IEnumerable<string> EnumDependents = GetCellsToRecalculate(name);
             IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+            reevaluateCells(ListDependents);
+            changed = true;
             return ListDependents;
         }
 
@@ -250,6 +254,8 @@ namespace SS
             try
             {
                 IList<string> ListDependents = GetCellsToRecalculate(name).ToList();
+                reevaluateCells(ListDependents);
+                changed = true;
                 return ListDependents;
             }
             //Code help from TA office hrs
@@ -283,7 +289,7 @@ namespace SS
         }
 
         /// <summary>
-        /// A helper method to help with the lookup of cell names 
+        /// A helper method to help with the lookup of cell names (variables) 
         /// to evaluate the functions
         /// </summary>
         /// <param name="name">looked-up cell name</param>
@@ -294,6 +300,16 @@ namespace SS
             if (nonEmptyCells[name].Value is not Double)
                 throw new ArgumentException();
             else return (Double)nonEmptyCells[name].Value;
+        }
+
+        /// <summary>
+        /// Helper method to re evaluate cells if a dependency has changed.
+        /// </summary>
+        /// <param name="affectedCells">a list of the cells affected because of the change</param>
+        private void reevaluateCells(IList<string> affectedCells)
+        {
+            foreach (string cellName in affectedCells)
+                nonEmptyCells[cellName].evaluate(lookup);
         }
     }
 
@@ -359,6 +375,26 @@ namespace SS
             _name = name;
             _contents = text;
             _value = text;
+        }
+
+        /// <summary>
+        /// evaluates the contents of the cell if a dependency has changed in some way.
+        /// i.e. re-evaluates cell.
+        /// <remarks>
+        /// if A1 contains 3, and B1 contains A1 + 5 and A1 is changed to 5, B1 needs to be re-evaluated.
+        /// Note that if the cell contains a string or double already, the method just re-inputs them to reset
+        /// the contents
+        /// </remarks>
+        /// </summary>
+        /// <param name="lookup">the lookup function for formula evaluation</param>
+        public void evaluate(Func<string, double> lookup)
+        {
+            if (this._contents is Double)
+                this._contents = (Double)_contents;
+            else if (this._contents is String)
+                this._contents = (String)_contents;
+            else if (this._contents is Formula)
+                this._contents = ((Formula)_contents).Evaluate(lookup);
         }
 
         #region Properties
