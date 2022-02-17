@@ -93,6 +93,7 @@ namespace SS
         /// <inheritdoc/>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
+            name = this.normalize(name);
             if (Double.TryParse(content, out double value))
                 return this.SetCellContents(name, value);
             else if (content.StartsWith("="))

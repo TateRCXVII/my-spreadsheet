@@ -148,6 +148,78 @@ namespace SpreadsheetTests
             spreadsheet.SetCellContents("3_g4", new Formula("x1*2"));
         }
 
+        /********** CONSTRUCTOR TESTS *************/
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void DefaultConstructorTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Assert.IsFalse(sheet.Changed);
+            sheet.SetContentsOfCell("A1", "=A5+x4");
+            Assert.AreEqual("default", sheet.Version);
+            Assert.AreEqual("=A1+x4", sheet.GetCellValue("A1"));
+            Assert.IsTrue(sheet.Changed);
+        }
+
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void DefaultConstructorFormulaEvaluationTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Assert.IsFalse(sheet.Changed);
+            sheet.SetContentsOfCell("A1", "=A5+x4");
+            sheet.SetContentsOfCell("A5", "5");
+            sheet.SetContentsOfCell("x4", "10");
+            Assert.AreEqual("default", sheet.Version);
+            Assert.AreEqual("=A1+x4", sheet.GetCellContents("A1"));
+            Assert.AreEqual(15.0, sheet.GetCellValue("A1"));
+            Assert.IsTrue(sheet.Changed);
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void EmptySheetConstructorTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Assert.AreEqual("", sheet.GetCellContents("A1"));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void NoNormalizerConstructorTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=A5+x4");
+            sheet.SetContentsOfCell("a1", "2");
+            Assert.AreEqual(2.0, sheet.GetCellContents("a1"));
+        }
+
+        /// <summary>
+        /// See name
+        /// </summary>
+        [TestMethod]
+        [Timeout(5000)]
+        public void ToUpperConstructorTest()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=A5+x4");
+            sheet.SetContentsOfCell("a1", "= 2+5");
+            Assert.AreEqual(7.0, sheet.GetCellValue("A1"));
+        }
 
         /********** GET NAMES TESTS ***************/
 
