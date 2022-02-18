@@ -1,5 +1,6 @@
 ﻿using SpreadsheetUtilities;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace SS
 {
@@ -26,7 +27,7 @@ namespace SS
             this.normalize = s => s;
             this.isValid = s => true;
             this.version = "default";
-            this.changed = true;
+            this.changed = false;
             this.nonEmptyCells = new Dictionary<String, Cell>();
             this.cellDependencies = new DependencyGraph();
         }
@@ -46,7 +47,7 @@ namespace SS
             this.isValid = isValid;
             this.normalize = normalize;
             this.version = version;
-            this.changed = true;
+            this.changed = false;
             this.nonEmptyCells = new Dictionary<String, Cell>();
             this.cellDependencies = new DependencyGraph();
         }
@@ -70,9 +71,39 @@ namespace SS
             this.isValid = isValid;
             this.normalize = normalize;
             this.version = version;
-            this.changed = true;
+            this.changed = false;
             this.nonEmptyCells = new Dictionary<String, Cell>();
             this.cellDependencies = new DependencyGraph();
+            try
+            {
+                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                xmlReaderSettings.IgnoreWhitespace = true; //Idea from a discussion group
+                using (XmlReader reader = XmlReader.Create(filepath))
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.IsStartElement())
+                        {
+                            string lowerName = reader.Name.ToLower();
+                            string cellName = "";
+                            string contents = "";
+                            switch (lowerName)
+                            {
+                                case "name":
+                                    reader.Read();
+                                    cellName = reader.ReadContentAsString();
+                                    break;
+                                case "contents":
+                                    reader.Read();
+                                    contents = reader.ReadContentAsString();
+                                    SetContentsOfCell(cellName, contents);
+                                    break;
+                            }
+                        }
+                    }catch (Exception ex)
+            {
+
+            }
         }
 
         ///<inheritdoc/>
