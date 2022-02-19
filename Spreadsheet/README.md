@@ -5,7 +5,7 @@ Date:       18-Feb-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
 Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII/tree/master/Spreadsheet
-Commit #:   f3ee84a8908597deba8425358c95230f2bb1b03b
+Commit #:   069fc9c5d77e3d4d14ff83de0d3b88e9ed852150
 Project:    Spreadsheet
 Copyright:  CS 3500 and Tate Reynolds - This work may not be copied for use in Academic Coursework.
 ```
