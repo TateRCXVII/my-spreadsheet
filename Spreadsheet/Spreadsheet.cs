@@ -6,7 +6,7 @@ namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z](?:[a-zA-Z]|\d)*"); //removed _ as valid var input
+        private readonly static Regex VariableRegex = new Regex(@"^[a-zA-Z]+[0-9]+$"); //removed _ as valid var input
         private Dictionary<String, Cell> nonEmptyCells;
         private DependencyGraph cellDependencies;
         //indicates if the sheet has been changed and not saved

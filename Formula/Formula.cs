@@ -317,7 +317,7 @@ namespace SpreadsheetUtilities
         {
             String doublePattern1 = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
             Regex lpPattern = new Regex(@"\(");
-            Regex varPattern = new Regex(@"^[a-zA-Z_](?:[a-zA-Z_]|\d)*");
+            Regex varPattern = new Regex(@"^[a-zA-Z]+[0-9]+$");
             Regex doublePattern = new Regex(doublePattern1);
             Regex rpPattern = new Regex(@"\)");
             Regex opPattern = new Regex(@"[\+\-*/]");
