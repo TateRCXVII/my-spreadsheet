@@ -11,9 +11,6 @@ namespace SS
         private DependencyGraph cellDependencies;
         //indicates if the sheet has been changed and not saved
         private bool changed;
-        private string version;
-        private readonly Func<string, string> normalize;
-        private readonly Func<string, bool> isValid;
 
         /// <summary>
         /// Creates an empty spreadsheet
@@ -22,14 +19,11 @@ namespace SS
         /// and use the name "default" as the version.
         /// </summary>
         public Spreadsheet() :
-            base(s => true, s => s, "default")
+            this(s => true, s => s, "default")
         {
-            this.normalize = s => s;
-            this.isValid = s => true;
-            this.version = "default";
-            this.changed = false;
-            this.nonEmptyCells = new Dictionary<String, Cell>();
-            this.cellDependencies = new DependencyGraph();
+            changed = false;
+            nonEmptyCells = new Dictionary<String, Cell>();
+            cellDependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -44,12 +38,9 @@ namespace SS
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
             base(isValid, normalize, version)
         {
-            this.isValid = isValid;
-            this.normalize = normalize;
-            this.version = version;
-            this.changed = false;
-            this.nonEmptyCells = new Dictionary<String, Cell>();
-            this.cellDependencies = new DependencyGraph();
+            changed = false;
+            nonEmptyCells = new Dictionary<String, Cell>();
+            cellDependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -65,48 +56,48 @@ namespace SS
         /// <param name="normalize"></param>
         /// <param name="version"></param>
         public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) :
-            base(isValid, normalize, version)
+            this(isValid, normalize, version)
         {
-            //TODO: handle loading from filepath
-            this.isValid = isValid;
-            this.normalize = normalize;
-            this.version = version;
-            this.changed = false;
-            this.nonEmptyCells = new Dictionary<String, Cell>();
-            this.cellDependencies = new DependencyGraph();
+            changed = false;
+            nonEmptyCells = new Dictionary<String, Cell>();
+            cellDependencies = new DependencyGraph();
+
+            if (!(GetSavedVersion(filepath).Equals(version)))
+                throw new SpreadsheetReadWriteException("Version of provided file doesn't match entered version.");
             try
             {
-                XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-                xmlReaderSettings.IgnoreWhitespace = true; //Idea from a discussion group
-                using (XmlReader reader = XmlReader.Create(filepath, xmlReaderSettings))
+                /* XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                 xmlReaderSettings.IgnoreWhitespace = true; //Idea from a discussion group*/
+                using (XmlReader reader = XmlReader.Create(filepath))
                 {
+                    string cellName = "";
+                    string contents = "";
                     while (reader.Read())
                     {
                         if (reader.IsStartElement())
                         {
-                            string lowerName = reader.Name.ToLower();
-                            string cellName = "";
-                            string contents = "";
-                            switch (lowerName)
+                            bool setContents = false;
+                            switch (reader.Name)
                             {
                                 case "spreadsheet":
+                                    Version = reader["version"];
+                                    break;
                                 case "cell":
                                 case "version":
+                                case "":
                                     break;
                                 case "name":
                                     reader.Read();
-                                    cellName = reader.ReadContentAsString();
-                                    cellName.Trim();
+                                    cellName = reader.Value;
                                     break;
                                 case "contents":
                                     reader.Read();
-                                    contents = reader.ReadContentAsString();
-                                    contents.Trim();
-                                    SetContentsOfCell(cellName, contents);
+                                    contents = reader.Value;
+                                    setContents = true;
                                     break;
-                                default:
-                                    throw new Exception("Invalid spreadsheet input.");
                             }
+                            if (setContents)
+                                SetContentsOfCell(cellName, contents);
                         }
                     }
                 }
@@ -123,7 +114,7 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         public override object GetCellContents(string name)
         {
-            name = this.normalize(name);
+            name = Normalize(name);
             if (!VariableRegex.IsMatch(name))
                 throw new InvalidNameException();
             if (!nonEmptyCells.ContainsKey(name))
@@ -135,13 +126,13 @@ namespace SS
         /// <inheritdoc/>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            name = this.normalize(name);
+            name = Normalize(name);
             if (Double.TryParse(content, out double value))
-                return this.SetCellContents(name, value);
+                return SetCellContents(name, value);
             else if (content.StartsWith("="))
-                return this.SetCellContents(name, new Formula(content.Substring(1), this.normalize, this.isValid));
+                return SetCellContents(name, new Formula(content.Substring(1), Normalize, IsValid));
             else
-                return this.SetCellContents(name, content);
+                return SetCellContents(name, content);
         }
 
         /// <inheritdoc/>
@@ -157,8 +148,8 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid, throws exception</exception>
         public override object GetCellValue(string name)
         {
-            name = this.normalize(name);
-            if (invalidVariable(name))
+            name = Normalize(name);
+            if (!validVariable(name))
                 throw new InvalidNameException();
             if (nonEmptyCells.ContainsKey(name))
                 return nonEmptyCells[name].Value;
@@ -176,7 +167,7 @@ namespace SS
                     while (reader.Read())
                     {
                         if (reader.Name.Equals("spreadsheet"))
-                            return reader.GetAttribute("version");
+                            return reader["version"];
                     }
                 }
             }
@@ -194,34 +185,41 @@ namespace SS
         //If there are any problems opening, reading, or closing the file
         public override void Save(string filename)
         {
+            if (filename.Equals(""))
+                throw new SpreadsheetReadWriteException("The filename can't be empty.");
+
             try
             {
                 //for formatting the xml correctly
                 XmlWriterSettings settings = new XmlWriterSettings();
                 settings.Indent = true;
-                settings.NewLineOnAttributes = true;
-                XmlWriter xmlWriter = XmlWriter.Create(filename, settings);
-                xmlWriter.WriteStartDocument();
-                xmlWriter.WriteStartElement("spreadsheet");
-                xmlWriter.WriteAttributeString("version", this.version);
-                foreach (KeyValuePair<string, Cell> cells in nonEmptyCells)
+                using (XmlWriter xmlWriter = XmlWriter.Create(filename, settings))
                 {
-                    xmlWriter.WriteStartElement("cell");
-                    xmlWriter.WriteElementString("name", cells.Key);
-                    //value pertains to the value in key-value pair. The contents is the content in the cell
-                    if (cells.Value.Contents is Formula)
+                    xmlWriter.WriteStartDocument();
+                    xmlWriter.WriteStartElement("spreadsheet");
+                    xmlWriter.WriteAttributeString("version", Version);
+                    foreach (string cell in nonEmptyCells.Keys)
                     {
-                        string equalsFormula = "=" + cells.Value.Contents.ToString();
-                        xmlWriter.WriteElementString("contents", equalsFormula);
+                        xmlWriter.WriteStartElement("cell");
+                        xmlWriter.WriteElementString("name", cell);
+
+                        if (nonEmptyCells[cell].Contents is Formula)
+                        {
+                            string equalsFormula = "=" + nonEmptyCells[cell].Contents.ToString();
+                            xmlWriter.WriteElementString("contents", equalsFormula);
+                        }
+                        else if (nonEmptyCells[cell].Contents is Double)
+                            xmlWriter.WriteElementString("contents", nonEmptyCells[cell].Contents.ToString());
+                        else
+                            xmlWriter.WriteElementString("contents", (string)nonEmptyCells[cell].Contents);
+                        xmlWriter.WriteEndElement();
                     }
-                    else
-                        xmlWriter.WriteElementString("contents", cells.Value.Contents.ToString());
                     xmlWriter.WriteEndElement();
+                    xmlWriter.WriteEndDocument();
+                    xmlWriter.Flush();
+                    xmlWriter.Dispose();
+                    changed = false;
                 }
-                xmlWriter.WriteEndElement();
-                xmlWriter.WriteEndDocument();
-                xmlWriter.Dispose();
-                changed = false;
             }
             catch (Exception ex)
             {
@@ -248,8 +246,8 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            name = this.normalize(name);
-            if (invalidVariable(name))
+            name = this.Normalize(name);
+            if (!validVariable(name))
                 throw new InvalidNameException();
 
             if (nonEmptyCells.ContainsKey(name))
@@ -280,8 +278,8 @@ namespace SS
         /// <exception cref="InvalidNameException">If the name is invalid or empty, throws InvalidNameException</exception>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            name = this.normalize(name);
-            if (invalidVariable(name))
+            name = Normalize(name);
+            if (!validVariable(name))
                 throw new InvalidNameException();
 
             if (text == "")
@@ -316,8 +314,8 @@ namespace SS
         /// <exception cref="CircularException">If setting the cell creates a circular dependency, throws CircularException</exception>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            name = this.normalize(name);
-            if (invalidVariable(name))
+            name = Normalize(name);
+            if (!validVariable(name))
                 throw new InvalidNameException();
             if (formula is null)
                 throw new ArgumentNullException();
@@ -371,9 +369,9 @@ namespace SS
         /// </summary>
         /// <param name="name">name of cell</param>
         /// <returns>true if the variable is invalid, false otherwise</returns>
-        private bool invalidVariable(string name)
+        private bool validVariable(string name)
         {
-            return !VariableRegex.IsMatch(name) && !this.isValid(name);
+            return VariableRegex.IsMatch(name) && IsValid(name);
         }
 
         /// <summary>
@@ -385,9 +383,19 @@ namespace SS
         /// <exception cref="ArgumentException">throws an argument exception if the looked up value is not a double</exception>
         private double lookup(string name)
         {
-            if (nonEmptyCells[name].Value is not Double)
+            name = Normalize(name);
+            if (nonEmptyCells.TryGetValue(name, out var cell))
+            {
+                if (cell.Value is double)
+                    return (double)cell.Value;
                 throw new ArgumentException();
-            else return (Double)nonEmptyCells[name].Value;
+            }
+            else
+                throw new ArgumentException();
+            /* name = Normalize(name);
+             if (nonEmptyCells[name].Value is not Double)
+                 throw new ArgumentException();
+             else return (Double)nonEmptyCells[name].Value;*/
         }
 
         /// <summary>
@@ -424,16 +432,6 @@ namespace SS
         //what is displayed in the cell without selection
         //Double or formula error
         private object _value;
-
-        //TODO: Delete this
-        /*        /// <summary>
-                /// Creates an empty cell
-                /// </summary>
-                public Cell(string name)
-                {
-                    _name = name;
-                    _contents = "";
-                }*/
 
         /// <summary>
         /// Creates a cell with formula as contents and its result as its value.
@@ -477,12 +475,12 @@ namespace SS
         /// <param name="lookup">the lookup function for formula evaluation</param>
         public void evaluate(Func<string, double> lookup)
         {
-            if (this._contents is Double)
-                this._contents = (Double)_contents;
-            else if (this._contents is String)
-                this._contents = (String)_contents;
-            else if (this._contents is Formula)
-                this._contents = ((Formula)_contents).Evaluate(lookup);
+            if (_contents is Double)
+                _value = (Double)_contents;
+            else if (_contents is String)
+                _value = (String)_contents;
+            else if (_contents is Formula)
+                _value = ((Formula)_contents).Evaluate(lookup);
         }
 
         #region Properties

@@ -66,7 +66,6 @@ namespace SpreadsheetUtilities
             this.formula = formula;
             this.normalize = s => s;
             this.isValid = s => true;
-
             VerifyParsing(GetTokens(formula), normalize, isValid);
         }
 
