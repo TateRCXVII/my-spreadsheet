@@ -78,7 +78,7 @@ namespace SS
             {
                 XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
                 xmlReaderSettings.IgnoreWhitespace = true; //Idea from a discussion group
-                using (XmlReader reader = XmlReader.Create(filepath))
+                using (XmlReader reader = XmlReader.Create(filepath, xmlReaderSettings))
                 {
                     while (reader.Read())
                     {
@@ -89,20 +89,31 @@ namespace SS
                             string contents = "";
                             switch (lowerName)
                             {
+                                case "spreadsheet":
+                                case "cell":
+                                case "version":
+                                    break;
                                 case "name":
                                     reader.Read();
                                     cellName = reader.ReadContentAsString();
+                                    cellName.Trim();
                                     break;
                                 case "contents":
                                     reader.Read();
                                     contents = reader.ReadContentAsString();
+                                    contents.Trim();
                                     SetContentsOfCell(cellName, contents);
                                     break;
+                                default:
+                                    throw new Exception("Invalid spreadsheet input.");
                             }
                         }
-                    }catch (Exception ex)
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-
+                throw new SpreadsheetReadWriteException(ex.Message);
             }
         }
 
@@ -155,10 +166,25 @@ namespace SS
                 return "";
         }
 
-        //TODO: Implement
+        /// <inheritdoc/>
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (XmlReader reader = XmlReader.Create(filename))
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.Name.Equals("spreadsheet"))
+                            return reader.GetAttribute("version");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SpreadsheetReadWriteException("Unknown error happened when reading the file:" + ex.Message);
+            }
+            throw new SpreadsheetReadWriteException("Version not found in spreadsheet XML file");
         }
 
         //TODO: Implement
@@ -168,8 +194,39 @@ namespace SS
         //If there are any problems opening, reading, or closing the file
         public override void Save(string filename)
         {
-            //TODO: manage the changed variable here (i.e. set back to false)
-            throw new NotImplementedException();
+            try
+            {
+                //for formatting the xml correctly
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Indent = true;
+                settings.NewLineOnAttributes = true;
+                XmlWriter xmlWriter = XmlWriter.Create(filename, settings);
+                xmlWriter.WriteStartDocument();
+                xmlWriter.WriteStartElement("spreadsheet");
+                xmlWriter.WriteAttributeString("version", this.version);
+                foreach (KeyValuePair<string, Cell> cells in nonEmptyCells)
+                {
+                    xmlWriter.WriteStartElement("cell");
+                    xmlWriter.WriteElementString("name", cells.Key);
+                    //value pertains to the value in key-value pair. The contents is the content in the cell
+                    if (cells.Value.Contents is Formula)
+                    {
+                        string equalsFormula = "=" + cells.Value.Contents.ToString();
+                        xmlWriter.WriteElementString("contents", equalsFormula);
+                    }
+                    else
+                        xmlWriter.WriteElementString("contents", cells.Value.Contents.ToString());
+                    xmlWriter.WriteEndElement();
+                }
+                xmlWriter.WriteEndElement();
+                xmlWriter.WriteEndDocument();
+                xmlWriter.Dispose();
+                changed = false;
+            }
+            catch (Exception ex)
+            {
+                throw new SpreadsheetReadWriteException("Error while writing spreadsheet to XML: " + ex.Message);
+            }
         }
 
         ///<inheritdoc/>
