@@ -1,7 +1,7 @@
 ```
 Author:     Tate Reynolds
 Partner:    None
-Date:       11-Feb-2022
+Date:       18-Feb-2022
 Course:     CS 3500, University of Utah, School of Computing
 GitHub ID:  TateRCXVII
 Repo:       https://github.com/Utah-School-of-Computing-de-St-Germain/spreadsheet-TateRCXVII/tree/master/Spreadsheet
@@ -17,29 +17,25 @@ assignment.
 # Time Estimate vs. Actual Breakdown
 |        | Expected | Actual | Notes                                                                                                                    |
 |--------|----------|--------|--------------------------------------------------------------------------------------------------------------------------|
-|Analysis| 2        | 3    | I was pretty close with my initial analysis of the problem. I did have to go back a few times and reread, which took me a little while.|
-|Testing | 3        | 3      | I worked hard on testing first! Helped me understand the problem more. |
-|Implementation | 1        | 2      | My initial thought that this would be a little more simple than it was. Fixing edge cases dragged the process out.                                           |
-|Debug   | 2        | 3      | I had a frustrating night trying to figure out all the regex stuff... that was a big chunk of time.             |
-| Total: | 8       | 11      |   |
+|Analysis| 2        | 2    | Taking notes streamlined the process a lot!|
+|Testing | 2        | 1      | Writing test for XML was tough |
+|Implementation | 2        | 2      | Not too many tough changes.          |
+|Debug   | 3        | 4      | The XML was a process...            |
+| Total: | 9       | 9      |   |
 
 # Assignment Specific Topics
-This assignment helped me internalize the benefits of starting with good code and using DRY principles. Having the ability to
-use methods and functionality we implemented in the past was really cool! Gave me a good perspective on everything.
+It was cool to be able to implement a feature that reads and writes a spreadsheet to an xml file! Really applicable to today
 ### Cell Class
 This project also includes a cell class which represents a cell in the Spreadsheet. The cell can contain a formula, text, or value
 at this stage of the Spreadsheet.
 
 # Consulted Peers:
-- Johnny
-- Collin Tree
+- Benedict Lim
+- Jonathan Evans
 - Sanjay Gounder
 - Thatcher Geary
-- TA Help Hours
 
 
 # References:
 
-    1. Namespace typing error - https://teamtreehouse.com/community/is-a-namespace-but-is-used-like-a-type
-    2. Casting (again) - https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/casting-and-type-conversions
-    3. Adding to .gitignore - https://elanderson.net/2020/10/add-git-ignore-to-an-existing-visual-studio-solution-new-git-experience/#:~:text=Open%20Visual%20Studio%20and%20the,Add%20button%20for%20Ignore%20file.
+    1. XML Writing - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/
