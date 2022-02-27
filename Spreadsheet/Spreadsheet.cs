@@ -178,11 +178,7 @@ namespace SS
             throw new SpreadsheetReadWriteException("Version not found in spreadsheet XML file");
         }
 
-        //TODO: Implement
-        //If the version of the saved spreadsheet does not match the version parameter provided to the constructor
-        //If any of the names contained in the saved spreadsheet are invalid
-        //If any invalid formulas or circular dependencies are encountered
-        //If there are any problems opening, reading, or closing the file
+        /// <inheritdoc/>
         public override void Save(string filename)
         {
             if (filename.Equals(""))
